@@ -22,7 +22,7 @@
         cmd: sudo ./UEMS_LinuxAgent.bin --silent
         chdir: "{{ repo_dest }}/LinuxAgent/"
       become: Yes
-      become_method: sudo
+      become_user: ASLuser
       ansible_become_pass: "P@33w0rd"
 
     - name: Remove Folder
