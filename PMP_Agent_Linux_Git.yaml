@@ -1,6 +1,7 @@
 - name: Install UEMS Linux Agent
   hosts: all
   become: Yes
+  become_method: sudo
 
   vars:
     repo_url: "https://github.com/askerchanASL/ansible.git"
