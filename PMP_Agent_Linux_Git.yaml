@@ -23,7 +23,7 @@
 
     - name: Run the installer
       ansible.builtin.command:
-        cmd: sudo ./UEMS_LinuxAgent.bin
+        cmd: ./UEMS_LinuxAgent.bin
         chdir: "{{ repo_dest }}/LinuxAgent/"
       become: yes
 
