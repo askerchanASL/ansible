@@ -1,7 +1,7 @@
 - name: Install UEMS Linux Agent
   hosts: all
   remote_user: ASLuser
-  become: true
+  become: yes
   vars:
     repo_url: "https://github.com/askerchanASL/ansible.git"
     repo_dest: "/tmp/ME"
