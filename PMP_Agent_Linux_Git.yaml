@@ -7,6 +7,10 @@
     #ansible_become_password: p@ssw0rd
       
   tasks:
+    - name: Whoami
+      ansible.builtin.command:
+        cmd: whoami
+      
     - name: Clone UEMS Linux Agent from Git
       ansible.builtin.git:
         repo: "{{ repo_url }}"
@@ -18,10 +22,6 @@
       ansible.builtin.file:
         path: "{{ repo_dest }}/LinuxAgent/UEMS_LinuxAgent.bin"
         mode: '0755'
-
-    - name: Whoami
-      ansible.builtin.command:
-        cmd: whoami
 
     - name: Run the installer
       command: "{{ repo_dest }}/LinuxAgent/UEMS_LinuxAgent.bin"
