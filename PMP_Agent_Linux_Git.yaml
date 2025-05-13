@@ -6,13 +6,17 @@
     repo_dest: "/tmp/ME"
 
   tasks:
+    - name: Clone UEMS Linux Agent from Git
+      ansible.builtin.git:
+        repo: "{{ repo_url }}"
+        dest: "{{ repo_dest }}"
+        version: "main"
 
-- name: Copy LinuxAgent file
-  ansible.builtin.copy:
-    src: "{{ repo_dest }}/LinuxAgent/"
-    dest: "{{ repo_dest }}"
-    mode: '0644'
-
+    - name: Copy LinuxAgent file
+      ansible.builtin.copy:
+        src: "{{ repo_dest }}/LinuxAgent/UEMS_LinuxAgent.bin"
+        dest: "{{ repo_dest }}/UEMS_LinuxAgent.bin"
+        mode: '0644'
 
     - name: Make UEMS_LinuxAgent.bin executable
       ansible.builtin.file:
