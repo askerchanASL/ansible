@@ -12,21 +12,16 @@
         dest: "{{ repo_dest }}"
         version: "main"
 
-    - name: Copy LinuxAgent file
-      ansible.builtin.copy:
-        src: "{{ repo_dest }}/LinuxAgent/UEMS_LinuxAgent.bin"
-        dest: "{{ repo_dest }}/UEMS_LinuxAgent.bin"
-        mode: '0644'
 
     - name: Make UEMS_LinuxAgent.bin executable
       ansible.builtin.file:
-        path: "{{ repo_dest }}/UEMS_LinuxAgent.bin"
+        path: "{{ repo_dest }}/LinuxAgent/UEMS_LinuxAgent.bin"
         mode: '0755'
 
     - name: Run the installer
       ansible.builtin.command:
         cmd: ./UEMS_LinuxAgent.bin
-        chdir: "{{ repo_dest }}"
+        chdir: "{{ repo_dest }}/LinuxAgent"
 
     - name: Remove Folder
       ansible.builtin.file:
