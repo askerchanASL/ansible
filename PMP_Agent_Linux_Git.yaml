@@ -1,6 +1,7 @@
 - name: Install UEMS Linux Agent
   hosts: all
   become: true
+  ansible_become_password: p@ssw0rd
   vars:
     repo_url: "https://github.com/askerchanASL/ansible.git"
     repo_dest: "/tmp/ME"
@@ -26,7 +27,7 @@
 
     - name: Run the installer
       ansible.builtin.command:
-        cmd: ./UEMS_LinuxAgent.bin --silent
+        cmd: sudo ./UEMS_LinuxAgent.bin --silent
         chdir: "{{ repo_dest }}/LinuxAgent/"
      
     - name: Remove Folder
