@@ -2,7 +2,7 @@
   hosts: all
   become: Yes
   become_method: sudo
-  become_pass: P@33w0rd
+  
 
   vars:
     repo_url: "https://github.com/askerchanASL/ansible.git"
@@ -25,8 +25,7 @@
     - name: Run the installer
       ansible.builtin.command:
         cmd: sudo ./UEMS_LinuxAgent.bin --silent
-        chdir: "{{ repo_dest }}/LinuxAgent/"
-      become: yes
+        chdir: "{{ repo_dest }}/LinuxAgent/"      
     
 
     - name: Remove Folder
