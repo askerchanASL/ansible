@@ -28,6 +28,10 @@
 
     - name: Run the installer
       command: "{{ repo_dest }}/LinuxAgent/UEMS_LinuxAgent.bin"
+      become: true
+      become: yes
+      become_user: ASLuser
+      become_method: sudo
      
     - name: Remove Folder
       ansible.builtin.file:
