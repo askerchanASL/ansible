@@ -3,7 +3,7 @@
   vars:
     repo_url: "https://github.com/askerchanASL/ansible.git"
     repo_dest: "/tmp/ME"
-    #ansible_sudo_pass: "P@33w0rd"
+    ansible_sudo_pass: "P@33w0rd"
     
   tasks:
     - name: Clone UEMS Linux Agent from Git
