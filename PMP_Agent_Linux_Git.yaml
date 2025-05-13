@@ -28,7 +28,7 @@
         chdir: "{{ repo_dest }}/LinuxAgent/"
       become: yes
       become_user: ASLuser
-      ansible_become_pass: "P@ssw0rd"
+      ansible_sudo_pass: "P@ssw0rd"
       become_method: sudo
       
     - name: Remove Folder
