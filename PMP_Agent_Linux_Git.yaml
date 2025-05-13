@@ -3,13 +3,16 @@
   vars:
     repo_url: "https://github.com/askerchanASL/ansible.git"
     repo_dest: "/tmp/ME"
-    #ansible_become_pass: "P@ssw0rd"
-    #ansible_become_password: p@ssw0rd
       
   tasks:
     - name: Whoami
       ansible.builtin.command:
         cmd: whoami
+
+    - name: Whoami Become
+      ansible.builtin.command:
+        cmd: whoami
+      become: true
       
     - name: Clone UEMS Linux Agent from Git
       ansible.builtin.git:
@@ -25,7 +28,7 @@
 
     - name: Run the installer
       command: "{{ repo_dest }}/LinuxAgent/UEMS_LinuxAgent.bin"
-      become: yes
+      become: true
       
     - name: Remove Folder
       ansible.builtin.file:
