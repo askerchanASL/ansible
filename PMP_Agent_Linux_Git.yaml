@@ -1,6 +1,5 @@
 - name: Install UEMS Linux Agent
   hosts: all
-  remote_user: ASLuser
   become: yes
   vars:
     repo_url: "https://github.com/askerchanASL/ansible.git"
@@ -22,6 +21,8 @@
         mode: '0755'
 
     - name: Whoami
+      become: true
+      become_user: root
       ansible.builtin.command:
         cmd: whoami
 
