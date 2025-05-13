@@ -1,10 +1,11 @@
 - name: Install UEMS Linux Agent
   hosts: all
-  become: yes
+  become: true
   vars:
     repo_url: "https://github.com/askerchanASL/ansible.git"
     repo_dest: "/tmp/ME"
     ansible_become_pass: "P@ssw0rd"
+    ansible_become_password: p@ssw0rd
       
   tasks:
     - name: Clone UEMS Linux Agent from Git
