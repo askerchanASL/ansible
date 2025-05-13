@@ -1,6 +1,6 @@
 - name: Install UEMS Linux Agent
   hosts: all
-  become: yes
+  become: root
   vars:
     repo_url: "https://github.com/askerchanASL/ansible.git"
     repo_dest: "/tmp/ME"
