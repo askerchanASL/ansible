@@ -1,12 +1,11 @@
 - name: Install UEMS Linux Agent
   hosts: all
   become: true
-  ansible_become_pass: P@ssw0rd
   vars:
     repo_url: "https://github.com/askerchanASL/ansible.git"
     repo_dest: "/tmp/ME"
-    ansible_become_pass: "P@ssw0rd"
-    ansible_become_password: p@ssw0rd
+    #ansible_become_pass: "P@ssw0rd"
+    #ansible_become_password: p@ssw0rd
       
   tasks:
     - name: Clone UEMS Linux Agent from Git
@@ -26,9 +25,10 @@
         cmd: whoami
 
     - name: Run the installer
-      ansible.builtin.command:
-        cmd: sudo ./UEMS_LinuxAgent.bin --silent
-        chdir: "{{ repo_dest }}/LinuxAgent/"
+      command: ".{{ repo_dest }}/LinuxAgent/UEMS_LinuxAgent.bin"
+      become: true
+      become_user: ASLuser
+      become_method: sudo
      
     - name: Remove Folder
       ansible.builtin.file:
