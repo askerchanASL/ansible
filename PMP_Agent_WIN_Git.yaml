@@ -1,0 +1,40 @@
+- name: Install UEMSAgent
+  hosts: all
+  gather_facts: no
+  collections:
+    - ansible.windows
+  vars:
+    install_dir: C:\TEMP\UEMSAgent
+    local_repo_path: /tmp/WindowsAgent
+    repo_url: "https://your-git-repo-url.com/your-repo.git"
+
+  pre_tasks:
+    - name: Clone WindowsAgent repo to control node
+      delegate_to: localhost
+      ansible.builtin.git:
+        repo: "{{ repo_url }}"
+        dest: "{{ local_repo_path }}"
+        version: "main"  # or specify a tag/branch/commit
+
+  tasks:
+    - name: Create installation directory on Windows
+      win_file:
+        path: "{{ install_dir }}"
+        state: directory
+
+    - name: Copy all installation files to Windows
+      win_copy:
+        src: "{{ local_repo_path }}"
+        dest: "{{ install_dir }}"
+        recurse: yes
+
+    - name: Install UEMSAgent using msiexec
+      win_command: >
+        msiexec /i "{{ install_dir }}\UEMSAgent.msi" /qn
+        TRANSFORMS="{{ install_dir }}\UEMSAgent.mst"
+        ENABLESILENT=yes
+        REBOOT=ReallySuppress
+        INSTALLSOURCE=Manual
+        SERVER_ROOT_CRT="{{ install_dir }}\DMRootCA-Server.crt"
+        DS_ROOT_CRT="{{ install_dir }}\DMRootCA.crt"
+        /lv "{{ install_dir }}\Agentinstalllog.txt"
