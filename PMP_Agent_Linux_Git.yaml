@@ -28,8 +28,8 @@
 
     - name: Run the installer
       ansible.builtin.command:
-        cmd: "./LinuxAgent/UEMS_LinuxAgent.bin"
-        chdir: "{{ repo_dest }}"
+        cmd: "./UEMS_LinuxAgent.bin"
+        chdir: "{{ repo_dest }}/LinuxAgent/"
       become: true
       
     - name: Remove Folder
