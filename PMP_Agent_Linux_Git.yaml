@@ -5,15 +5,6 @@
     repo_dest: "/tmp/ME"
       
   tasks:
-    - name: Whoami
-      ansible.builtin.command:
-        cmd: whoami
-
-    - name: Whoami Become
-      ansible.builtin.command:
-        cmd: whoami
-      become: true
-      
     - name: Clone UEMS Linux Agent from Git
       ansible.builtin.git:
         repo: "{{ repo_url }}"
@@ -36,3 +27,4 @@
       ansible.builtin.file:
         path: "{{ repo_dest }}"
         state: absent
+      become: true
