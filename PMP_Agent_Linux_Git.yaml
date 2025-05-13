@@ -31,3 +31,4 @@
       ansible.builtin.file:
         path: "{{ repo_dest }}"
         state: absent
+      become: yes
