@@ -24,7 +24,7 @@
         cmd: whoami
 
     - name: Run the installer
-      command: "{{ repo_dest }}/LinuxAgent/UEMS_LinuxAgent.bin"
+      command: "sudo {{ repo_dest }}/LinuxAgent/UEMS_LinuxAgent.bin"
       become: true
       
     - name: Remove Folder
