@@ -27,6 +27,7 @@
         cmd: ./UEMS_LinuxAgent.bin --silent
         chdir: "{{ repo_dest }}/LinuxAgent/"
       become: yes
+      become_user: ASLuser
       become_method: sudo
       
     - name: Remove Folder
