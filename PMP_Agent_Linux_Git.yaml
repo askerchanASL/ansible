@@ -1,8 +1,5 @@
 - name: Install UEMS Linux Agent
   hosts: all
-  become: true
-  become_user: ASLuser
-  become_method: sudo
   vars:
     repo_url: "https://github.com/askerchanASL/ansible.git"
     repo_dest: "/tmp/ME"
@@ -29,12 +26,8 @@
     - name: Run the installer
       command: "{{ repo_dest }}/LinuxAgent/UEMS_LinuxAgent.bin"
       become: true
-      become: yes
-      become_user: ASLuser
-      become_method: sudo
-     
+      
     - name: Remove Folder
       ansible.builtin.file:
         path: "{{ repo_dest }}"
         state: absent
-      become: yes
