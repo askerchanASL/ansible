@@ -21,8 +21,8 @@
       ansible.builtin.command:
         cmd: sudo ./UEMS_LinuxAgent.bin --silent
         chdir: "{{ repo_dest }}/LinuxAgent/"
-        become: Yes
-        become_method: sudo
+      become: Yes
+      become_method: sudo
 
     - name: Remove Folder
       ansible.builtin.file:
