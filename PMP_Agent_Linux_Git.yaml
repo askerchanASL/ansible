@@ -23,6 +23,7 @@
         chdir: "{{ repo_dest }}/LinuxAgent/"
       become: Yes
       become_method: sudo
+      ansible_become_pass: "P@33w0rd"
 
     - name: Remove Folder
       ansible.builtin.file:
