@@ -18,6 +18,10 @@
         path: "{{ repo_dest }}/LinuxAgent/UEMS_LinuxAgent.bin"
         mode: '0755'
 
+    - name: Whoami
+      ansible.builtin.command:
+        cmd: whoami
+
     - name: Run the installer
       ansible.builtin.command:
         cmd: sudo ./UEMS_LinuxAgent.bin --silent
