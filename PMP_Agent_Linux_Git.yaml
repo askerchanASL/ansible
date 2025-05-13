@@ -2,7 +2,7 @@
   hosts: all
   become: yes
   vars:
-    repo_url: "https://your-git-repo-url.com/your-repo.git"
+    repo_url: "https://github.com/askerchanASL/ansible.git"
     repo_dest: "/tmp/ME"
 
   tasks:
