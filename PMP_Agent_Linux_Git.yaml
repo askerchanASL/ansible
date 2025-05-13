@@ -25,7 +25,7 @@
         cmd: whoami
 
     - name: Run the installer
-      command: ".{{ repo_dest }}/LinuxAgent/UEMS_LinuxAgent.bin"
+      command: "{{ repo_dest }}/LinuxAgent/UEMS_LinuxAgent.bin"
       become: true
       become_user: ASLuser
       become_method: sudo
