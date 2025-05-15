@@ -4,7 +4,7 @@
   collections:
     - ansible.windows
   vars:
-    install_dir: C:\TEMP\UEMSAgent
+    install_dir: C:\TEMP\UEMSAgent\WindowsAgent
     local_repo_path: /tmp/WindowsAgent
     repo_url: "https://github.com/askerchanASL/ansible.git"
 
@@ -54,7 +54,7 @@
     - name: Copy all installation files to Windows
       win_copy:
         src: "{{ local_repo_path }}/WindowsAgent"
-        dest: "{{ install_dir }}"
+        dest: C:\TEMP\UEMSAgent
         recurse: yes
 
     - name: Install UEMSAgent using msiexec
