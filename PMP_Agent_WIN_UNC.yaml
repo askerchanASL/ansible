@@ -7,14 +7,8 @@
   vars:
     install_dir: "C:\\TEMP\\UEMSAgent\\WindowsAgent"
     unc_source_path: "\\\\172.16.17.60\\Agent\\Source"
-    unc_username: "{{ vault_unc_username }}"  # Stored securely in Ansible Vault
-    unc_password: "{{ vault_unc_password }}"  # Stored securely in Ansible Vault
 
   tasks:
-    - name: Authenticate to UNC share without mapping drive
-      win_shell: |
-        net use "{{ unc_source_path }}" /user:{{ unc_username }} "{{ unc_password }}"
-
     - name: Create installation directory on Windows
       win_file:
         path: "{{ install_dir }}"
