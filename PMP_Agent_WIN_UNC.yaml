@@ -1,19 +1,26 @@
-- name: Install UEMSAgent
+- name: Install UEMSAgent from UNC path
   hosts: all
   gather_facts: no
   collections:
     - ansible.windows
+
   vars:
-    install_dir: C:\TEMP\UEMSAgent\WindowsAgent
-    unc_source_path: "\\\\172.16.17.60\\Agent\\Source"  # Replace with your actual UNC path
+    install_dir: "C:\\TEMP\\UEMSAgent\\WindowsAgent"
+    unc_source_path: "\\\\172.16.17.60\\Agent\\Source"
+    unc_username: "Dev\administrator"  # Stored securely in Ansible Vault
+    unc_password: "{{P@ssw0rd}}"  # Stored securely in Ansible Vault
 
   tasks:
+    - name: Authenticate to UNC share without mapping drive
+      win_shell: |
+        net use "{{ unc_source_path }}" /user:{{ unc_username }} "{{ unc_password }}"
+
     - name: Create installation directory on Windows
       win_file:
         path: "{{ install_dir }}"
         state: directory
 
-    - name: Copy installation files from UNC path to local directory
+    - name: Copy installation files from UNC path
       win_command: >
         robocopy "{{ unc_source_path }}" "{{ install_dir }}" /E /Z /NFL /NDL /NP /NJH /NJS
       args:
