@@ -68,7 +68,6 @@
         DS_ROOT_CRT="{{ install_dir }}\DMRootCA.crt"
         /lv "\\172.16.17.60\%COomputername%Agentinstalllog.txt"
 
-    
     - name: Remove installation directory after installation
       win_file:
         path: "{{ install_dir }}"
