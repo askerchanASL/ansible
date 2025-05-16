@@ -8,54 +8,7 @@
     local_repo_path: /tmp/WindowsAgent
     repo_url: "https://github.com/askerchanASL/ansible.git"
 
-  pre_tasks:
-    - name: Create local repo directory
-      delegate_to: localhost
-      ansible.builtin.file:
-        path: "{{ local_repo_path }}"
-        state: directory
 
-    - name: Initialize empty Git repo
-      delegate_to: localhost
-      ansible.builtin.command:
-        cmd: git init
-        chdir: "{{ local_repo_path }}"
-
-    - name: Add remote origin
-      delegate_to: localhost
-      ansible.builtin.command:
-        cmd: git remote add origin "{{ repo_url }}"
-        chdir: "{{ local_repo_path }}"
-
-    - name: Enable sparse checkout
-      delegate_to: localhost
-      ansible.builtin.command:
-        cmd: git sparse-checkout init --cone
-        chdir: "{{ local_repo_path }}"
-
-    - name: Set sparse-checkout path to WindowsAgent directory
-      delegate_to: localhost
-      ansible.builtin.command:
-        cmd: git sparse-checkout set WindowsAgent
-        chdir: "{{ local_repo_path }}"
-
-    - name: Pull only the WindowsAgent directory
-      delegate_to: localhost
-      ansible.builtin.command:
-        cmd: git pull origin main
-        chdir: "{{ local_repo_path }}"
-
-  tasks:
-    - name: Create installation directory on Windows
-      win_file:
-        path: "{{ install_dir }}"
-        state: directory
-
-    - name: Copy all installation files to Windows
-      win_copy:
-        src: "{{ local_repo_path }}/WindowsAgent"
-        dest: C:\TEMP\UEMSAgent
-        recurse: yes
 
     - name: Uninstall UEMSAgent using msiexec
       win_command: >
