@@ -1,0 +1,76 @@
+- name: Mount UNC share and copy LinuxAgent to AAP server
+  hosts: localhost
+  gather_facts: no
+  vars:
+    unc_path: "//172.16.17.60/Agent/LinuxAgent"  # Replace with your actual UNC path
+    mount_point: "/mnt/unc_share"
+    repo_dest: "/tmp/ME"
+    cifs_username: "your_username"         # Replace with your credentials
+    cifs_password: "your_password"
+
+  tasks:
+    - name: Ensure mount point exists
+      ansible.builtin.file:
+        path: "{{ mount_point }}"
+        state: directory
+
+    - name: Mount the UNC share
+      ansible.posix.mount:
+        path: "{{ mount_point }}"
+        src: "{{ unc_path }}"
+        fstype: cifs
+        opts: "username={{ cifs_username }},password={{ cifs_password }},rw"
+        state: mounted
+
+    - name: Ensure destination directory exists
+      ansible.builtin.file:
+        path: "{{ repo_dest }}"
+        state: directory
+
+    - name: Copy LinuxAgent directory from mounted UNC share
+      ansible.builtin.copy:
+        src: "{{ mount_point }}/"
+        dest: "{{ repo_dest }}/LinuxAgent/"
+        mode: '0755'
+        remote_src: yes
+
+    - name: Unmount the UNC share
+      ansible.posix.mount:
+        path: "{{ mount_point }}"
+        state: unmounted
+
+    - name: Remove mount point directory
+      ansible.builtin.file:
+        path: "{{ mount_point }}"
+        state: absent
+
+- name: Install UEMS Linux Agent on target machines
+  hosts: all
+  become: true
+  vars:
+    repo_dest: "/tmp/ME"
+
+  tasks:
+    - name: Copy UEMS Linux Agent to target
+      ansible.builtin.copy:
+        src: "{{ repo_dest }}/LinuxAgent/"
+        dest: "{{ repo_dest }}/LinuxAgent/"
+        mode: '0755'
+        owner: root
+        group: root
+        remote_src: no
+
+    - name: Make UEMS_LinuxAgent.bin executable
+      ansible.builtin.file:
+        path: "{{ repo_dest }}/LinuxAgent/UEMS_LinuxAgent.bin"
+        mode: '0755'
+
+    - name: Run the installer
+      ansible.builtin.command:
+        cmd: "./UEMS_LinuxAgent.bin"
+        chdir: "{{ repo_dest }}/LinuxAgent/"
+
+    - name: Remove Folder
+      ansible.builtin.file:
+        path: "{{ repo_dest }}"
+        state: absent
