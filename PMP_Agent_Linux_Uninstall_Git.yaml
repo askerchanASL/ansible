@@ -1,0 +1,18 @@
+- name: Uninstall UEMSAgent on Linux
+  hosts: all
+  become: yes
+  tasks:
+    - name: Navigate to the Agent Installation Directory
+      ansible.builtin.shell: cd /usr/local/manageengine/uems_agent/
+      args:
+        chdir: /usr/local/manageengine/uems_agent/
+
+    - name: Set Executable Permissions on Removal Script
+      ansible.builtin.file:
+        path: /usr/local/manageengine/uems_agent/RemoveUEMSAgent.sh
+        mode: '0755'
+
+    - name: Run the Removal Script
+      ansible.builtin.shell: ./RemoveUEMSAgent.sh
+      args:
+        chdir: /usr/local/manageengine/uems_agent/
