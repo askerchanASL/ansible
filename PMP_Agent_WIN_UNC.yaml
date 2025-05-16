@@ -1,4 +1,4 @@
-- name: Install UEMSAgent from UNC path
+- name: Install UEMSAgent from UNC path using net use
   hosts: all
   gather_facts: no
   collections:
@@ -6,9 +6,15 @@
 
   vars:
     install_dir: "C:\\TEMP\\UEMSAgent\\WindowsAgent"
-    unc_source_path: "\\\\172.16.17.60\\Source"
+    unc_source_path: "\\\\172.16.17.60\\Agent\\Source"
+    unc_username: "Dev\\administrator"  # Replace with actual domain and username
+    unc_password: "P@ssw0rd"          # Replace with actual password
 
   tasks:
+    - name: Authenticate to UNC share using net use (no drive letter)
+      win_shell: |
+        net use "{{ unc_source_path }}" /user:{{ unc_username }} "{{ unc_password }}"
+
     - name: Create installation directory on Windows
       win_file:
         path: "{{ install_dir }}"
@@ -35,3 +41,8 @@
       win_file:
         path: "{{ install_dir }}"
         state: absent
+
+    - name: Disconnect from UNC share
+      win_shell: |
+        net use "{{ unc_source_path }}" /delete
+      ignore_errors: yes
