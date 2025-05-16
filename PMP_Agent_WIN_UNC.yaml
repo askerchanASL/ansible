@@ -7,7 +7,7 @@
   vars:
     install_dir: "C:\\TEMP\\UEMSAgent\\WindowsAgent"
     unc_source_path: "\\\\172.16.17.60\\Agent\\Source"
-    unc_username: "Dev\\administrator"  # Replace with actual domain and username
+    unc_username: "172.16.17.60\\administrator"  # Replace with actual domain and username
     unc_password: "P@ssw0rd"          # Replace with actual password
 
   tasks:
