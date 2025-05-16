@@ -1,0 +1,36 @@
+- name: Install UEMSAgent
+  hosts: all
+  gather_facts: no
+  collections:
+    - ansible.windows
+  vars:
+    install_dir: C:\TEMP\UEMSAgent\WindowsAgent
+    unc_source_path: "\\172.16.17.60\Agent\Source\"  # Replace with your actual UNC path
+
+  tasks:
+    - name: Create installation directory on Windows
+      win_file:
+        path: "{{ install_dir }}"
+        state: directory
+
+    - name: Copy installation files from UNC path to local directory
+      win_command: >
+        robocopy "{{ unc_source_path }}" "{{ install_dir }}" /E /Z /NFL /NDL /NP /NJH /NJS
+      args:
+        creates: "{{ install_dir }}\UEMSAgent.msi"
+
+    - name: Install UEMSAgent using msiexec
+      win_command: >
+        msiexec /i "{{ install_dir }}\UEMSAgent.msi" /qn
+        TRANSFORMS="{{ install_dir }}\UEMSAgent.mst"
+        ENABLESILENT=yes
+        REBOOT=ReallySuppress
+        INSTALLSOURCE=Manual
+        SERVER_ROOT_CRT="{{ install_dir }}\DMRootCA-Server.crt"
+        DS_ROOT_CRT="{{ install_dir }}\DMRootCA.crt"
+        /lv "{{ install_dir }}\%COMPUTERNAME%Agentinstalllog.txt"
+
+    - name: Remove installation directory after installation
+      win_file:
+        path: "{{ install_dir }}"
+        state: absent
