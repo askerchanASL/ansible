@@ -2,7 +2,7 @@
   hosts: localhost
   gather_facts: no
   vars:
-    repo_url: "https://github.com/askerchanASL/ansible.git"
+    repo_url: "http://oauth2:glpat-7pHHbQ92ssiwKJAysNUd@172.16.13.110:8929/asker.chan/askerchan_dev.git"
     repo_dest: "/tmp/ME"
     sparse_dir: "LinuxAgent"
 
