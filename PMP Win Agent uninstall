@@ -1,0 +1,19 @@
+- name: Install UEMSAgent
+  hosts: all
+  gather_facts: no
+  collections:
+    - ansible.windows
+  vars:
+    install_dir: C:\TEMP\UEMSAgent\WindowsAgent
+    local_repo_path: /tmp/WindowsAgent
+    repo_url: "https://github.com/askerchanASL/ansible.git"
+
+  tasks:
+    - name: Uninstall UEMSAgent using msiexec
+      win_command: >
+        msiexec /x "{6AD2231F-FF48-4D59-AC26-405AFAE23DB7}" /qn
+        
+        ENABLESILENT=yes
+        REBOOT=ReallySuppress
+        INSTALLSOURCE=Manual
+        /lv "{{ install_dir }}%ComputerAgentuninstallinstalllog.txt"
