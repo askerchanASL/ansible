@@ -6,7 +6,7 @@
 
   vars:
     install_dir: "C:\\TEMP\\UEMSAgent\\WindowsAgent"
-    unc_source_path: "\\\\172.16.17.60\\Agent\\Source"
+    unc_source_path: "\\\\172.16.17.60\\Source"
 
   tasks:
     - name: Create installation directory on Windows
