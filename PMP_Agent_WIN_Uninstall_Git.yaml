@@ -8,8 +8,7 @@
     local_repo_path: /tmp/WindowsAgent
     repo_url: "https://github.com/askerchanASL/ansible.git"
 
-
-
+  tasks:
     - name: Uninstall UEMSAgent using msiexec
       win_command: >
         msiexec /x "{{ install_dir }}\UEMSAgent.msi" /qn
