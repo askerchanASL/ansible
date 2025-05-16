@@ -17,18 +17,18 @@
       win_command: >
         robocopy "{{ unc_source_path }}" "{{ install_dir }}" /E /Z /NFL /NDL /NP /NJH /NJS
       args:
-        creates: "{{ install_dir }}\UEMSAgent.msi"
+        creates: "{{ install_dir }}\\UEMSAgent.msi"
 
     - name: Install UEMSAgent using msiexec
       win_command: >
-        msiexec /i "{{ install_dir }}\UEMSAgent.msi" /qn
-        TRANSFORMS="{{ install_dir }}\UEMSAgent.mst"
+        msiexec /i "{{ install_dir }}\\UEMSAgent.msi" /qn
+        TRANSFORMS="{{ install_dir }}\\UEMSAgent.mst"
         ENABLESILENT=yes
         REBOOT=ReallySuppress
         INSTALLSOURCE=Manual
-        SERVER_ROOT_CRT="{{ install_dir }}\DMRootCA-Server.crt"
-        DS_ROOT_CRT="{{ install_dir }}\DMRootCA.crt"
-        /lv "{{ install_dir }}\%COMPUTERNAME%Agentinstalllog.txt"
+        SERVER_ROOT_CRT="{{ install_dir }}\\DMRootCA-Server.crt"
+        DS_ROOT_CRT="{{ install_dir }}\\DMRootCA.crt"
+        /lv "{{ install_dir }}\\%COMPUTERNAME%Agentinstalllog.txt"
 
     - name: Remove installation directory after installation
       win_file:
