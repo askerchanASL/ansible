@@ -1,16 +1,58 @@
-- name: Install UEMS Linux Agent
-  hosts: all
+- name: Clone only LinuxAgent directory on AAP server
+  hosts: localhost
+  gather_facts: no
   vars:
     repo_url: "https://github.com/askerchanASL/ansible.git"
     repo_dest: "/tmp/ME"
-      
+    sparse_dir: "LinuxAgent"
+
   tasks:
-    - name: Clone UEMS Linux Agent from Git
-      ansible.builtin.git:
-        repo: "{{ repo_url }}"
-        dest: "{{ repo_dest }}"
-        version: "main"
-        force: yes
+    - name: Ensure destination directory exists
+      ansible.builtin.file:
+        path: "{{ repo_dest }}"
+        state: directory
+
+    - name: Initialize empty Git repo
+      ansible.builtin.command:
+        cmd: "git init"
+        chdir: "{{ repo_dest }}"
+
+    - name: Set remote origin
+      ansible.builtin.command:
+        cmd: "git remote add origin {{ repo_url }}"
+        chdir: "{{ repo_dest }}"
+
+    - name: Enable sparse checkout
+      ansible.builtin.command:
+        cmd: "git config core.sparseCheckout true"
+        chdir: "{{ repo_dest }}"
+
+    - name: Define sparse-checkout paths
+      ansible.builtin.copy:
+        dest: "{{ repo_dest }}/.git/info/sparse-checkout"
+        content: |
+          {{ sparse_dir }}
+
+    - name: Pull only the specified directory
+      ansible.builtin.command:
+        cmd: "git pull origin main"
+        chdir: "{{ repo_dest }}"
+
+- name: Install UEMS Linux Agent on target machines
+  hosts: all
+  become: true
+  vars:
+    repo_dest: "/tmp/ME"
+
+  tasks:
+    - name: Copy UEMS Linux Agent to target
+      ansible.builtin.copy:
+        src: "/tmp/ME/LinuxAgent/"
+        dest: "{{ repo_dest }}/LinuxAgent/"
+        mode: '0755'
+        owner: root
+        group: root
+        remote_src: no
 
     - name: Make UEMS_LinuxAgent.bin executable
       ansible.builtin.file:
@@ -21,10 +63,8 @@
       ansible.builtin.command:
         cmd: "./UEMS_LinuxAgent.bin"
         chdir: "{{ repo_dest }}/LinuxAgent/"
-      become: true
-      
+
     - name: Remove Folder
       ansible.builtin.file:
         path: "{{ repo_dest }}"
         state: absent
-      become: true
