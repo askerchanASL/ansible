@@ -5,7 +5,7 @@
     - ansible.windows
   vars:
     install_dir: C:\TEMP\UEMSAgent\WindowsAgent
-    unc_source_path: "\\172.16.17.60\Agent\Source\"  # Replace with your actual UNC path
+    unc_source_path: "\\\\172.16.17.60\\Agent\\Source"  # Replace with your actual UNC path
 
   tasks:
     - name: Create installation directory on Windows
