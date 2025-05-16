@@ -66,7 +66,7 @@
         INSTALLSOURCE=Manual
         SERVER_ROOT_CRT="{{ install_dir }}\DMRootCA-Server.crt"
         DS_ROOT_CRT="{{ install_dir }}\DMRootCA.crt"
-        /lv "{{ install_dir }}\Agentinstalllog.txt"
+        /lv "\\172.16.17.60\%COomputername%Agentinstalllog.txt"
 
     
     - name: Remove installation directory after installation
