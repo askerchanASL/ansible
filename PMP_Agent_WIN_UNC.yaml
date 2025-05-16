@@ -7,8 +7,9 @@
   vars:
     install_dir: "C:\\TEMP\\UEMSAgent\\WindowsAgent"
     unc_source_path: "\\\\172.16.17.60\\Agent\\Source"
-    unc_username: "172.16.17.60\\administrator"  # Replace with actual domain and username
-    unc_password: "P@ssw0rd"          # Replace with actual password
+    unc_username: "172.16.17.60\administrator"
+    unc_password: "P@ssw0rd"
+
 
   tasks:
     - name: Authenticate to UNC share using net use (no drive letter)
