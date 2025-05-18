@@ -6,7 +6,7 @@
   vars:
     install_dir: C:\TEMP\UEMSAgent\WindowsAgent
     local_repo_path: /tmp/WindowsAgent
-    repo_url: "https://github.com/askerchanASL/ansible.git"
+    repo_url: "https://asker.chan:glpat-3p3-sFSmQJJtRNe5_AZL@gitlab.uat-asl.com/asker.chan/ansible.git"
 
   pre_tasks:
     - name: Create local repo directory
