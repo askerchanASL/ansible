@@ -1,16 +1,22 @@
+---
+- name: Copy folder from UNC share path
+  hosts: all
+  gather_facts: no
+  tasks:
+    - name: Map network share (no credentials)
+      win_shell: |
+        net use \\172.16.17.60\Source
+      args:
+        executable: cmd
 
-- name: Map network share (no credentials)
-  win_shell: |
-    net use \\172.16.17.60\Source
-  args:
-    executable: cmd
+    - name: Copy folder from UNC path to local directory
+      win_shell: |
+        robocopy "\\172.16.17.60\Source" "C:\TEMP\UEMS" /E /Z /R:3 /W:5
+      args:
+        executable: cmd
 
-- name: Copy folder from UNC path to local directory
-  win_shell: |
-    robocopy "\\172.16.17.60\Source" "C:\TEMP\UEMS" /E /Z /R:3 /W:5
-  args:
-    executable: cmd
-
-- name: Disconnect network share
-  win_shell: |
-    net use \\172.16.17.60\Source /delete
+    - name: Disconnect network share
+      win_shell: |
+        net use \\172.16.17.60\Source /delete
+      args:
+        executable: cmd
