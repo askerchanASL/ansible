@@ -1,7 +1,7 @@
 
 ---
 - name: Copy folder from UNC share path
-  hosts: windows
+  hosts: All
   gather_facts: no
   tasks:
     - name: Copy folder from UNC path to local directory
