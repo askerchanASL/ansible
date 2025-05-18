@@ -1,10 +1,10 @@
-
+---
 - name: Copy folder from UNC share path
-  hosts: All
-  gather_facts: no
-  tasks:
-    - name: Copy folder from UNC path to local directory
-      win_shell: |
-        robocopy "\\172.16.17.60\Source" "C:\TEMP\UEMS" /E /Z /R:3 /W:5
-      args:
-        executable: cmd
+  hosts: all
+  gather_facts: no
+  tasks:
+    - name: Copy folder from UNC path to local directory
+      win_shell: |
+        robocopy "\\172.16.17.60\Source" "C:\TEMP\UEMS" /E /Z /R:3 /W:5
+      args:
+        executable: cmd
