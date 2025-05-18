@@ -1,11 +1,11 @@
 ---
-- name: Copy folder from UNC share path
+- name: Copy folder from UNC share path using guest access
   hosts: all
   gather_facts: no
   tasks:
-    - name: Map network share (no credentials)
+    - name: Map network share using guest account
       win_shell: |
-        net use \\172.16.17.60\Source
+        net use \\172.16.17.60\Source "" /user:"guest"
       args:
         executable: cmd
 
