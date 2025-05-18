@@ -1,5 +1,4 @@
 
----
 - name: Copy folder from UNC share path
   hosts: All
   gather_facts: no
