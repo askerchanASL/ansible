@@ -4,7 +4,7 @@
   vars:
     repo_url: "https://github.com/askerchanASL/ansible.git"
     repo_dest: "/tmp/ME"
-    sparse_dir: "LinuxAgent"
+    sparse_dir: "Linux"
 
   tasks:
     - name: Ensure destination directory exists
@@ -40,13 +40,13 @@
 
     - name: Make UEMS_LinuxAgent.bin executable
       ansible.builtin.file:
-        path: "{{ repo_dest }}/LinuxAgent/UEMS_LinuxAgent.bin"
+        path: "{{ repo_dest }}/Linux/UEMS_LinuxAgent.bin"
         mode: '0755'
 
     - name: Run the installer
       ansible.builtin.command:
         cmd: "./UEMS_LinuxAgent.bin"
-        chdir: "{{ repo_dest }}/LinuxAgent/"
+        chdir: "{{ repo_dest }}/Linux/"
 
     - name: Remove Folder
       ansible.builtin.file:
