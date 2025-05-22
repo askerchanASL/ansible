@@ -3,47 +3,39 @@
   gather_facts: no
   collections:
     - ansible.windows
+
   vars:
     install_dir: C:\TEMP\UEMSAgent\WindowsAgent
     local_repo_path: /tmp/WindowsAgent
     repo_url: "https://asker.chan:glpat-3p3-sFSmQJJtRNe5_AZL@gitlab.uat-asl.com/asker.chan/ansible.git"
 
   pre_tasks:
-    - name: Create local repo directory
+    - name: Clone WindowsAgent directory from GitLab (run once)
       delegate_to: localhost
-      ansible.builtin.file:
-        path: "{{ local_repo_path }}"
-        state: directory
+      run_once: true
+      block:
+        - name: Ensure local repo directory is clean
+          ansible.builtin.file:
+            path: "{{ local_repo_path }}"
+            state: absent
 
-    - name: Initialize empty Git repo
-      delegate_to: localhost
-      ansible.builtin.command:
-        cmd: git init
-        chdir: "{{ local_repo_path }}"
+        - name: Clone repo with sparse checkout enabled
+          ansible.builtin.git:
+            repo: "{{ repo_url }}"
+            dest: "{{ local_repo_path }}"
+            version: main
+            depth: 1
+            single_branch: yes
+            accept_hostkey: yes
+          environment:
+            GIT_SPARSE_CHECKOUT_CONE: "true"
+          register: git_clone_result
 
-    - name: Add remote origin
-      delegate_to: localhost
-      ansible.builtin.command:
-        cmd: git remote add origin "{{ repo_url }}"
-        chdir: "{{ local_repo_path }}"
-
-    - name: Enable sparse checkout
-      delegate_to: localhost
-      ansible.builtin.command:
-        cmd: git sparse-checkout init --cone
-        chdir: "{{ local_repo_path }}"
-
-    - name: Set sparse-checkout path to WindowsAgent directory
-      delegate_to: localhost
-      ansible.builtin.command:
-        cmd: git sparse-checkout set WindowsAgent
-        chdir: "{{ local_repo_path }}"
-
-    - name: Pull only the WindowsAgent directory
-      delegate_to: localhost
-      ansible.builtin.command:
-        cmd: git pull origin main
-        chdir: "{{ local_repo_path }}"
+        - name: Set sparse-checkout path to WindowsAgent
+          ansible.builtin.command:
+            cmd: git sparse-checkout set WindowsAgent
+            chdir: "{{ local_repo_path }}"
+          when: git_clone_result.changed
 
   tasks:
     - name: Create installation directory on Windows
