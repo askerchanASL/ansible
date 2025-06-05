@@ -14,10 +14,10 @@
   - name: Clean hostname (remove newline)
     set_fact:
       clean_hostname: "{{ hostname_result.stdout | trim }}"
-      src1: "C:\Temp\running_services_"{{ clean_hostname }}".txt"
-      src2: "C:\Temp\disk_space_"{{ clean_hostname }}".txt"
-      dst1: "\\172.16.17.40\Patch\running_services_"{{ clean_hostname }}".txt"
-      dst2: "\\172.16.17.40\Patch\disk_space_"{{ clean_hostname }}".txt"
+      src1: "C:\\Temp\\running_services_"{{ clean_hostname }}".txt"
+      src2: "C:\\Temp\\disk_space_"{{ clean_hostname }}".txt"
+      dst1: "\\\\172.16.17.40\\Patch\\running_services_"{{ clean_hostname }}".txt"
+      dst2: "\\\\172.16.17.40\\Patch\\disk_space_"{{ clean_hostname }}".txt"
       
 
   - name: Get list of running services
