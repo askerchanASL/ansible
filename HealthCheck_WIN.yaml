@@ -84,3 +84,6 @@
   - name: Show copy debug output
     debug:
       var: copy_output.stdout_lines
+  - name: Show debug msg
+    debug:
+      msg: "Ansible Version: {{ ansibleVersion.stdout }}"
