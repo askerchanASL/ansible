@@ -42,25 +42,45 @@
       debug:
         var: disk_space.stdout_lines
 
-    - name: Copy files to network share using UNC path and show paths
+    - name: Copy files to network share using UNC path with debug output
       win_shell: |
         $hostname = "{{ clean_hostname }}"
-        $src1 = "C:\Temp\running_services_${hostname}.txt"
-        $src2 = "C:\Temp\disk_space_${hostname}.txt"
-        $dst1 = "\\172.16.17.40\patch\running_services_${hostname}.txt"
-        $dst2 = "\\172.16.17.40\patch\disk_space_${hostname}.txt"
+        $src1 = "C:\\Temp\\running_services_${hostname}.txt"
+        $src2 = "C:\\Temp\\disk_space_${hostname}.txt"
+        $dst1 = "\\\\172.16.17.40\\patch\\running_services_${hostname}.txt"
+        $dst2 = "\\\\172.16.17.40\\patch\\disk_space_${hostname}.txt"
 
         $output = @()
-        $output += "Copying $src1 to $dst1"
-        $output += "Copying $src2 to $dst2"
 
-        
-        Copy-Item -Path $src1 -Destination $dst1 -Force
-        Copy-Item -Path $src2 -Destination $dst2 -Force
+        if (Test-Path $src1) {
+          $output += "Source exists: $src1"
+        } else {
+          $output += "ERROR: Source file not found: $src1"
+        }
+
+        if (Test-Path $src2) {
+          $output += "Source exists: $src2"
+        } else {
+          $output += "ERROR: Source file not found: $src2"
+        }
+
+        try {
+          Copy-Item -Path $src1 -Destination $dst1 -Force -ErrorAction Stop
+          $output += "SUCCESS: Copied $src1 to $dst1"
+        } catch {
+          $output += "ERROR copying $src1 to $dst1: $_"
+        }
+
+        try {
+          Copy-Item -Path $src2 -Destination $dst2 -Force -ErrorAction Stop
+          $output += "SUCCESS: Copied $src2 to $dst2"
+        } catch {
+          $output += "ERROR copying $src2 to $dst2: $_"
+        }
 
         $output | Out-String
       register: copy_output
 
-    - name: Show copy paths
+    - name: Show copy debug output
       debug:
         var: copy_output.stdout_lines
