@@ -55,8 +55,8 @@
         $output += "Copying $src2 to $dst2"
 
         # Uncomment the lines below to perform the actual copy
-         Copy-Item -Path $src1 -Destination $dst1 -Force
-         Copy-Item -Path $src2 -Destination $dst2 -Force
+        Copy-Item -Path $src1 -Destination $dst1 -Force
+        Copy-Item -Path $src2 -Destination $dst2 -Force
 
         $output | Out-String
       register: copy_output
