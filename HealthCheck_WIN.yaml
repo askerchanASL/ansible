@@ -2,6 +2,7 @@
   hosts: all
   gather_facts: yes
 
+
   tasks:
   - name: Gather system facts
     ansible.builtin.setup:
@@ -13,6 +14,11 @@
   - name: Clean hostname (remove newline)
     set_fact:
       clean_hostname: "{{ hostname_result.stdout | trim }}"
+      src1: "C:\Temp\running_services_{{ clean_hostname }}.txt"
+      src2: "C:\Temp\disk_space_{{ clean_hostname }}.txt"
+      dst1: "\\172.16.17.40\Patch\running_services_{{ clean_hostname }}.txt"
+      dst2: "\\172.16.17.40\Patch\disk_space_{{ clean_hostname }}.txt"
+      
 
   - name: Get list of running services
     win_shell: |
@@ -43,44 +49,18 @@
       var: disk_space.stdout_lines
 
   - name: Copy files to network share using UNC path with debug output
-    win_shell: |     
+    ansible.windows.win_powershell: |     
       $hostname = "{{ clean_hostname }}"
-      $src1 = "C:\Temp\running_services_{{ clean_hostname }}.txt"
-      $src2 = "C:\Temp\disk_space_{{ clean_hostname }}.txt"
-      $dst1 = "\\172.16.17.40\Patch\running_services_{{ clean_hostname }}.txt"
-      $dst2 = "\\172.16.17.40\Patch\disk_space_{{ clean_hostname }}.txt"
+      Copy-Item -Path "{{src1}}" -Destination "{{dst1}}" -Force -ErrorAction Stop
+      Copy-Item -Path "{{src2}}" -Destination "{{dst1}}" -Force -ErrorAction Stop
       
-      $output = @()
+      
 
-      if (Test-Path $src1) {
-        $output += "Source exists: $src1"
-      } else {
-        $output += "ERROR: Source file not found: $src1"
-      }
 
-      if (Test-Path $src2) {
-        $output += "Source exists: $src2"
-      } else {
-        $output += "ERROR: Source file not found: $src2"
-      }
-
-      try {
-        Copy-Item -Path $src1 -Destination $dst1 -Force -ErrorAction Stop
-        $output += "SUCCESS: Copied $src1 to $dst1"
-      } catch {
-        $output += "ERROR copying $src1 to $dst1)"
-      }
-
-      try {
-        Copy-Item -Path $src2 -Destination $dst2 -Force -ErrorAction Stop
-        $output += "SUCCESS: Copied $src2 to $dst2"
-      } catch {
-        $output += "ERROR copying $src2 to $dst2)"
-      }
-
-      $output | Out-String
     register: copy_output
     args: executable:powershell
+    
+
 
   - name: Show copy debug output
     debug:
