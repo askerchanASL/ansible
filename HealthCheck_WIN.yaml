@@ -1,4 +1,3 @@
----
 - name: Windows Server Health Check
   hosts: all
   gather_facts: yes
