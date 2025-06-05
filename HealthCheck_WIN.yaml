@@ -14,7 +14,7 @@
     - name: Save running services to a file
       win_copy:
         content: "{{ running_services.stdout }}"
-        dest: "C:\Temp\running_services.txt"
+        dest: "C:\\Temp\\running_services.txt"
 
     - name: Display running services
       debug:
@@ -28,7 +28,7 @@
     - name: Save disk space to a file
       win_copy:
         content: "{{ disk_space.stdout }}"
-        dest: "C:\Temp\disk_space.txt"
+        dest: "C:\\Temp\\disk_space.txt"
 
     - name: Display disk space
       debug:
@@ -42,7 +42,7 @@
     - name: Save CPU usage to a file
       win_copy:
         content: "{{ cpu_usage.stdout }}"
-        dest: "C:\Temp\cpu_usage.txt"
+        dest: "C:\\Temp\\cpu_usage.txt"
 
     - name: Display CPU usage
       debug:
@@ -56,7 +56,7 @@
     - name: Save memory usage to a file
       win_copy:
         content: "{{ memory_usage.stdout }}"
-        dest: "C:\Temp\memory_usage.txt"
+        dest: "C:\\Temp\\memory_usage.txt"
 
     - name: Display memory usage
       debug:
