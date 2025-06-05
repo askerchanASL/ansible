@@ -14,7 +14,7 @@
     - name: Save running services to a file
       win_copy:
         content: "{{ running_services.stdout }}"
-        dest: "C:\\Temp\\running_services.txt"
+        dest: "\\\172.16.17.40\\\running_services.txt"
 
     - name: Display running services
       debug:
@@ -28,36 +28,10 @@
     - name: Save disk space to a file
       win_copy:
         content: "{{ disk_space.stdout }}"
-        dest: "C:\\Temp\\disk_space.txt"
+        dest: "\\\172.16.17.40\\\disk_space.txt"
 
     - name: Display disk space
       debug:
         var: disk_space.stdout_lines
 
-    - name: Check CPU usage
-      win_shell: |
-        Get-WmiObject Win32_Processor | Select-Object LoadPercentage
-      register: cpu_usage
 
-    - name: Save CPU usage to a file
-      win_copy:
-        content: "{{ cpu_usage.stdout }}"
-        dest: "C:\\Temp\\cpu_usage.txt"
-
-    - name: Display CPU usage
-      debug:
-        var: cpu_usage.stdout_lines
-
-    - name: Check memory usage
-      win_shell: |
-        Get-WmiObject Win32_OperatingSystem | Select-Object @{Name="TotalVisibleMemorySize(GB)";Expression={[math]::round($_.TotalVisibleMemorySize/1MB,2)}}, @{Name="FreePhysicalMemory(GB)";Expression={[math]::round($_.FreePhysicalMemory/1MB,2)}}
-      register: memory_usage
-
-    - name: Save memory usage to a file
-      win_copy:
-        content: "{{ memory_usage.stdout }}"
-        dest: "C:\\Temp\\memory_usage.txt"
-
-    - name: Display memory usage
-      debug:
-        var: memory_usage.stdout_lines
