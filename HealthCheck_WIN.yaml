@@ -71,7 +71,7 @@
           Copy-Item -Path "{{ src2 }}" -Destination "{{ dst2 }}" -Force -ErrorAction Stop
           Write-Output "SUCCESS: Copied "{{ src2 }}" to "{{ dst2 }}"
         } catch {
-          Write-Output "ERROR copying $src2 to $dst2: $($_.Exception.Message)"
+          Write-Output "ERROR copying "{{ src2 }}" to "{{ dst2 }}": $($_.Exception.Message)"
         }
       register: copy_output
       vars:
