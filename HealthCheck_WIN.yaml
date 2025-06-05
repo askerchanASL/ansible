@@ -1,95 +1,86 @@
 - name: Windows Server Health Check
   hosts: all
   gather_facts: yes
+
   tasks:
+  - name: Gather system facts
+    ansible.builtin.setup:
 
-    - name: Gather system facts
-      ansible.builtin.setup:
+  - name: Get hostname
+    win_shell: hostname
+    register: hostname_result
 
-    - name: Get hostname
-      win_shell: hostname
-      register: hostname_result
+  - name: Clean hostname (remove newline)
+    set_fact:
+      clean_hostname: "{{ hostname_result.stdout | trim }}"
 
-    - name: Clean hostname (remove newline)
-      set_fact:
-        clean_hostname: "{{ hostname_result.stdout | trim }}"
+  - name: Get list of running services
+    win_shell: |
+      Get-Service | Where-Object {$_.Status -eq "Running"} | Select-Object Name, DisplayName, Status
+    register: running_services
 
-    - name: Get list of running services
-      win_shell: |
-        Get-Service | Where-Object {$_.Status -eq "Running"} | Select-Object Name, DisplayName, Status
-      register: running_services
+  - name: Save running services to a file
+    win_copy:
+      content: "{{ running_services.stdout }}"
+      dest: "C:\\Temp\\running_services_{{ clean_hostname }}.txt"
 
-    - name: Save running services to a file
-      win_copy:
-        content: "{{ running_services.stdout }}"
-        dest: "C:\\Temp\\running_services_{{ clean_hostname }}.txt"
+  - name: Display running services
+    debug:
+      var: running_services.stdout_lines
 
-    - name: Display running services
-      debug:
-        var: running_services.stdout_lines
+  - name: Check disk space
+    win_shell: |
+      Get-PSDrive -PSProvider FileSystem | Select-Object Name, @{Name="Used(GB)";Expression={[math]::round($_.Used/1GB,2)}}, @{Name="Free(GB)";Expression={[math]::round($_.Free/1GB,2)}}, @{Name="Total(GB)";Expression={[math]::round($_.Used/1GB,2) + [math]::round($_.Free/1GB,2)}}
+    register: disk_space
 
-    - name: Check disk space
-      win_shell: |
-        Get-PSDrive -PSProvider FileSystem | Select-Object Name, @{Name="Used(GB)";Expression={[math]::round($_.Used/1GB,2)}}, @{Name="Free(GB)";Expression={[math]::round($_.Free/1GB,2)}}, @{Name="Total(GB)";Expression={[math]::round($_.Used/1GB,2) + [math]::round($_.Free/1GB,2)}}
-      register: disk_space
+  - name: Save disk space to a file
+    win_copy:
+      content: "{{ disk_space.stdout }}"
+      dest: "C:\\Temp\\disk_space_{{ clean_hostname }}.txt"
 
-    - name: Save disk space to a file
-      win_copy:
-        content: "{{ disk_space.stdout }}"
-        dest: "C:\\Temp\\disk_space_{{ clean_hostname }}.txt"
+  - name: Display disk space
+    debug:
+      var: disk_space.stdout_lines
 
-    - name: Display disk space
-      debug:
-        var: disk_space.stdout_lines
+  - name: Copy files to network share using UNC path with debug output
+    win_shell: |
+      $hostname = "{{ clean_hostname }}"
+      $src1 = "C:\\Temp\\running_services_{{ clean_hostname }}.txt"
+      $src2 = "C:\\Temp\\disk_space_{{ clean_hostname }}.txt"
+      $dst1 = "\\\\172.16.17.40\\patch\\running_services_{{ clean_hostname }}.txt"
+      $dst2 = "\\\\172.16.17.40\\patch\\disk_space_{{ clean_hostname }}.txt"
 
-    - name: Copy files to network share using Invoke-Command with debug output
-      win_shell: |
-        $hostname = "{{ clean_hostname }}"
-        $src1 = "C:\\Temp\\running_services_${hostname}.txt"
-        $src2 = "C:\\Temp\\disk_space_${hostname}.txt"
-        $dst1 = "\\\\172.16.17.40\\patch\\running_services_${hostname}.txt"
-        $dst2 = "\\\\172.16.17.40\\patch\\disk_space_${hostname}.txt"
+      $output = @()
 
-        $username = "Dev\\Administrator"
-        $password = ConvertTo-SecureString "P@ssw0rd" -AsPlainText -Force
-        $cred = New-Object System.Management.Automation.PSCredential($username, $password)
+      if (Test-Path $src1) {
+        $output += "Source exists: $src1"
+      } else {
+        $output += "ERROR: Source file not found: $src1"
+      }
 
-        $output = @()
-        $output += "Preparing to copy files from $env:COMPUTERNAME"
+      if (Test-Path $src2) {
+        $output += "Source exists: $src2"
+      } else {
+        $output += "ERROR: Source file not found: $src2"
+      }
 
-        if (Test-Path $src1) {
-          $output += "Source exists: $src1"
-        } else {
-          $output += "ERROR: Source file not found: $src1"
-        }
+      try {
+        Copy-Item -Path $src1 -Destination $dst1 -Force -ErrorAction Stop
+        $output += "SUCCESS: Copied $src1 to $dst1"
+      } catch {
+        $output += "ERROR copying $src1 to $dst1: $_"
+      }
 
-        if (Test-Path $src2) {
-          $output += "Source exists: $src2"
-        } else {
-          $output += "ERROR: Source file not found: $src2"
-        }
+      try {
+        Copy-Item -Path $src2 -Destination $dst2 -Force -ErrorAction Stop
+        $output += "SUCCESS: Copied $src2 to $dst2"
+      } catch {
+        $output += "ERROR copying $src2 to $dst2: $_"
+      }
 
-        Invoke-Command -ComputerName 172.16.17.40 -Credential $cred -ScriptBlock {
-          param($src1, $src2, $dst1, $dst2)
-          $result = @()
-          try {
-            Copy-Item -Path $src1 -Destination $dst1 -Force -ErrorAction Stop
-            $result += "SUCCESS: Copied $src1 to $dst1"
-          } catch {
-            $result += "ERROR copying $src1 to $dst1: $_"
-          }
-          try {
-            Copy-Item -Path $src2 -Destination $dst2 -Force -ErrorAction Stop
-            $result += "SUCCESS: Copied $src2 to $dst2"
-          } catch {
-            $result += "ERROR copying $src2 to $dst2: $_"
-          }
-          return $result
-        } -ArgumentList $src1, $src2, $dst1, $dst2 | ForEach-Object { $output += $_ }
+      $output | Out-String
+    register: copy_output
 
-        $output | Out-String
-      register: copy_output
-
-    - name: Show copy debug output
-      debug:
-        var: copy_output.stdout_lines
+  - name: Show copy debug output
+    debug:
+      var: copy_output.stdout_lines
