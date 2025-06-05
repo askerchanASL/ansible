@@ -42,7 +42,7 @@
       debug:
         var: disk_space.stdout_lines
 
-    - name: Copy files to network share using UNC path with debug output
+    - name: Copy files to network share using Invoke-Command with debug output
       win_shell: |
         $hostname = "{{ clean_hostname }}"
         $src1 = "C:\\Temp\\running_services_${hostname}.txt"
@@ -50,7 +50,12 @@
         $dst1 = "\\\\172.16.17.40\\patch\\running_services_${hostname}.txt"
         $dst2 = "\\\\172.16.17.40\\patch\\disk_space_${hostname}.txt"
 
+        $username = "DOMAIN\\username"
+        $password = ConvertTo-SecureString "your_password" -AsPlainText -Force
+        $cred = New-Object System.Management.Automation.PSCredential($username, $password)
+
         $output = @()
+        $output += "Preparing to copy files from $env:COMPUTERNAME"
 
         if (Test-Path $src1) {
           $output += "Source exists: $src1"
@@ -64,19 +69,23 @@
           $output += "ERROR: Source file not found: $src2"
         }
 
-        try {
-          Copy-Item -Path $src1 -Destination $dst1 -Force -ErrorAction Stop
-          $output += "SUCCESS: Copied $src1 to $dst1"
-        } catch {
-          $output += "ERROR copying $src1 to $dst1: $_"
-        }
-
-        try {
-          Copy-Item -Path $src2 -Destination $dst2 -Force -ErrorAction Stop
-          $output += "SUCCESS: Copied $src2 to $dst2"
-        } catch {
-          $output += "ERROR copying $src2 to $dst2: $_"
-        }
+        Invoke-Command -ComputerName 172.16.17.40 -Credential $cred -ScriptBlock {
+          param($src1, $src2, $dst1, $dst2)
+          $result = @()
+          try {
+            Copy-Item -Path $src1 -Destination $dst1 -Force -ErrorAction Stop
+            $result += "SUCCESS: Copied $src1 to $dst1"
+          } catch {
+            $result += "ERROR copying $src1 to $dst1: $_"
+          }
+          try {
+            Copy-Item -Path $src2 -Destination $dst2 -Force -ErrorAction Stop
+            $result += "SUCCESS: Copied $src2 to $dst2"
+          } catch {
+            $result += "ERROR copying $src2 to $dst2: $_"
+          }
+          return $result
+        } -ArgumentList $src1, $src2, $dst1, $dst2 | ForEach-Object { $output += $_ }
 
         $output | Out-String
       register: copy_output
