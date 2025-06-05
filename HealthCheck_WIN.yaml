@@ -50,8 +50,8 @@
         $dst1 = "\\\\172.16.17.40\\patch\\running_services_${hostname}.txt"
         $dst2 = "\\\\172.16.17.40\\patch\\disk_space_${hostname}.txt"
 
-        $username = "DOMAIN\\username"
-        $password = ConvertTo-SecureString "your_password" -AsPlainText -Force
+        $username = "Dev\\Administrator"
+        $password = ConvertTo-SecureString "P@ssw0rd" -AsPlainText -Force
         $cred = New-Object System.Management.Automation.PSCredential($username, $password)
 
         $output = @()
