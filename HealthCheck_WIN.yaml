@@ -1,0 +1,22 @@
+---
+- name: Windows Server Health Check
+  hosts: windows_servers
+  gather_facts: yes
+  tasks:
+
+    - name: Gather system facts
+      ansible.builtin.setup:
+
+    - name: Get list of running services
+      win_shell: |
+        Get-Service | Where-Object {$_.Status -eq "Running"} | Select-Object Name, DisplayName, Status
+      register: running_services
+
+    - name: Save running services to a file
+      win_copy:
+        content: "{{ running_services.stdout }}"
+        dest: "C:\\Temp\\running_services.txt"
+
+    - name: Display running services
+      debug:
+        var: running_services.stdout_lines
