@@ -62,14 +62,14 @@
         $dst1 = "{{ dst1 }}"
         $dst2 = "{{ dst2 }}"
         try {
-          Copy-Item -Path $src1 -Destination $dst1 -Force -ErrorAction Stop
-          Write-Output "SUCCESS: Copied $src1 to $dst1"
+          Copy-Item -Path "{{ src1 }}" -Destination "{{ dst1 }}" -Force -ErrorAction Stop
+          Write-Output "SUCCESS: Copied "{{ src1 }}" to "{{ dst1 }}"
         } catch {
-          Write-Output "ERROR copying $src1 to $dst1: $($_.Exception.Message)"
+          Write-Output "ERROR copying "{{ src1 }}" to "{{ dst1 }}": $($_.Exception.Message)"
         }
         try {
-          Copy-Item -Path $src2 -Destination $dst2 -Force -ErrorAction Stop
-          Write-Output "SUCCESS: Copied $src2 to $dst2"
+          Copy-Item -Path "{{ src2 }}" -Destination "{{ dst2 }}" -Force -ErrorAction Stop
+          Write-Output "SUCCESS: Copied "{{ src2 }}" to "{{ dst2 }}"
         } catch {
           Write-Output "ERROR copying $src2 to $dst2: $($_.Exception.Message)"
         }
