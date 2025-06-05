@@ -44,7 +44,7 @@
         var: disk_space.stdout_lines
     - name: Copy files to network share using UNC path with debug output
       ansible.windows.win_powershell:
-        $hostname = "{{ clean_hostname }}"
+        $hostname = {{ clean_hostname }}
 
         Copy-Item -Path "{{src1}}" -Destination "{{dst1}}" -Force -ErrorAction Stop
 
