@@ -1,15 +1,17 @@
 ---
 - name: Windows Server Health Check
   hosts: all
-  gather_facts: yes
+  gather_facts: no
 
   tasks:
-    - name: Gather system facts
-      ansible.builtin.setup: null
 
     - name: Get hostname
       win_shell: hostname
       register: hostname_result
+
+    - name: Debug hostname result
+      debug:
+        var: hostname_result.stdout
 
     - name: Clean hostname (remove newline)
       set_fact:
@@ -19,6 +21,10 @@
         dst1: "\\\\172.16.17.40\\Patch\\running_services_{{ clean_hostname }}.txt"
         dst2: "\\\\172.16.17.40\\Patch\\disk_space_{{ clean_hostname }}.txt"
 
+    - name: Debug clean hostname
+      debug:
+        var: clean_hostname
+
     - name: Get list of running services
       win_shell: >
         Get-Service | Where-Object {$_.Status -eq "Running"} | Select-Object
@@ -26,7 +32,7 @@
       register: running_services
 
     - name: Save running services to a file
-      win_file:
+      win_copy:
         content: "{{ running_services.stdout }}"
         dest: "C:\\Temp\\running_services_{{ clean_hostname }}.txt"
 
@@ -54,7 +60,6 @@
 
     - name: Copy files to network share using UNC path
       win_shell: |
-        ##script: |
         $src1 = "{{ src1 }}"
         $src2 = "{{ src2 }}"
         $dst1 = "{{ dst1 }}"
@@ -72,8 +77,6 @@
           Write-Output "ERROR copying $src2 to $dst2: $($_.Exception.Message)"
         }
       register: copy_output
-      args:
-        executable: powershell
 
     - name: Show copy debug output
       debug:
