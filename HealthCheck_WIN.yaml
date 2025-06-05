@@ -14,7 +14,7 @@
     - name: Save running services to a file
       win_copy:
         content: "{{ running_services.stdout }}"
-        dest: "\\\\172.16.17.40\\patch\\running_services.txt"
+        dest: "c:\\Temp\\running_services.txt"
 
     - name: Display running services
       debug:
@@ -28,7 +28,7 @@
     - name: Save disk space to a file
       win_copy:
         content: "{{ disk_space.stdout }}"
-        dest: "\\\\172.16.17.40\\patch\\disk_space.txt"
+        dest: "c:\\Temp\\disk_space.txt"
 
     - name: Display disk space
       debug:
