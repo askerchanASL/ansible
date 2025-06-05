@@ -86,4 +86,4 @@
       var: copy_output.stdout_lines
   - name: Show debug msg
     debug:
-      msg: "{{copy_output}}"
+      msg: "{{copy_output.stdout}}"
