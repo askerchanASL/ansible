@@ -1,0 +1,131 @@
+---
+- name: Remote Health-Check
+  hosts: all
+  become: true
+  gather_facts: yes
+
+  vars:
+    timestamp: "{{ ansible_date_time.date }}-{{ ansible_date_time.time | replace(':','') }}"
+    log_file: "/tmp/healthcheck-{{ inventory_hostname }}-{{ timestamp }}.log"
+
+  tasks:
+
+    - name: Create empty log file
+      file:
+        path: "{{ log_file }}"
+        state: touch
+        mode: '0644'
+
+    - name: Header
+      shell: |
+        echo "Health-Check for {{ inventory_hostname }} @ {{ ansible_date_time.date }} {{ ansible_date_time.time }}" \
+          >> {{ log_file }}
+
+    - name: 1. System Info
+      shell: |
+        {
+          echo "===== 1. System Info ====="
+          date
+          hostnamectl
+          cat /etc/redhat-release
+          uname -rmp
+        } >> {{ log_file }}
+
+    - name: 2. Uptime & Load
+      shell: |
+        {
+          echo "===== 2. Uptime & Load ====="
+          uptime
+          w
+          ( command -v mpstat >/dev/null && mpstat -P ALL 1 1 || echo "## mpstat not installed" )
+          ( command -v sar     >/dev/null && sar -q 1 1     || echo "## sar not installed" )
+        } >> {{ log_file }}
+
+    - name: 3. CPU & Memory
+      shell: |
+        {
+          echo "===== 3. CPU & Memory ====="
+          free -h
+          vmstat 1 1
+          top -b -n1 | head -n20
+        } >> {{ log_file }}
+
+    - name: 4. Disks & Filesystems
+      shell: |
+        {
+          echo "===== 4. Disks & Filesystems ====="
+          lsblk
+          df -hT
+          df -i
+          ( command -v iostat >/dev/null && iostat -xz 1 1 || echo "## iostat not installed" )
+        } >> {{ log_file }}
+
+    - name: 5. LVM & RAID
+      shell: |
+        {
+          echo "===== 5. LVM & RAID ====="
+          pvscan
+          vgscan
+          lvscan
+          if ls /dev/md* &>/dev/null; then
+            mdadm --detail /dev/md*
+          else
+            echo "## no MD devices"
+          fi
+        } >> {{ log_file }}
+
+    - name: 7. Network
+      shell: |
+        {
+          echo "===== 7. Network ====="
+          ip addr show
+          ip route show
+          ss -tuna | head -n10
+        } >> {{ log_file }}
+
+    - name: 7b. Per-interface ethtool
+      shell: "ethtool {{ item }} >> {{ log_file }} 2>&1 || echo \"## ethtool missing or failed on {{ item }}\" >> {{ log_file }}"
+      loop: "{{ ansible_interfaces | difference(['lo']) }}"
+
+    - name: 8. Time & NTP
+      shell: |
+        {
+          echo "===== 8. Time & NTP ====="
+          timedatectl
+          ( command -v chronyc >/dev/null && { chronyc tracking; chronyc sourcestats; } || echo "## chronyc not installed" )
+        } >> {{ log_file }}
+
+    - name: 9. Services & Processes
+      shell: |
+        {
+          echo "===== 9. Services & Processes ====="
+          systemctl list-units --type=service --state=failed
+          echo
+          echo "---- Enabled services ----"
+          systemctl list-unit-files --state=enabled
+          echo
+          echo "---- Running services ----"
+          systemctl list-units --type=service --state=running
+          echo
+          echo "---- Top 10 memory consumers ----"
+          ps aux --sort=-%mem | head -n10
+        } >> {{ log_file }}
+
+    - name: 11. Firewall
+      shell: |
+        {
+          echo "===== 11. Firewall ====="
+          firewall-cmd --state
+          firewall-cmd --list-all
+        } >> {{ log_file }}
+
+    - name: Final report
+      shell: |
+        echo "Health-check complete. Log saved to {{ log_file }}" >> {{ log_file }}
+
+# ─── NEW TASK ────────────────────────────────────────────────────────────────
+    - name: Fetch the health-check log back to the control node
+      fetch:
+        src: "{{ log_file }}"         # the file on the remote host
+        dest: "/tmp/"                 # local directory on the control node
+        flat: yes                     # avoid creating host sub-dirs

@@ -1,0 +1,45 @@
+---
+- name: Ensure filesystems meet minimum free space requirements
+  hosts: all
+  become: yes
+
+  vars:
+    min_free_gb: 10        # Minimum requirement in GB for filesystems
+    boot_min_free_mb: 200  # Minimum requirement in MB for /boot
+
+  tasks:
+    - name: Get disk usage using df command
+      ansible.builtin.command: df -P -k
+      register: df_output
+      changed_when: false
+
+    - name: Process filesystem information
+      ansible.builtin.set_fact:
+        filesystems: "{{ df_output.stdout_lines[1:] | map('regex_replace', '\\s+', ' ') | map('split', ' ') | list }}"
+
+    - name: Check disk space requirements
+      ansible.builtin.set_fact:
+        error_message: >-
+          {%- set errors = [] -%}
+          {%- for fs in filesystems -%}
+            {%- set fs_free_kb = fs.3 | int -%}
+            {%- if fs.5 == '/boot' and fs_free_kb < (boot_min_free_mb * 1024) -%}
+              {%- set _ = errors.append('/boot (' ~ (fs_free_kb / 1024) | round(2) ~ 'MB free, needs ' ~ boot_min_free_mb ~ 'MB)') -%}
+            {%- elif fs.5 != '/boot' and '/dev' in fs.0 and 'tmpfs' not in fs.0 and fs_free_kb < (min_free_gb * 1024 * 1024) -%}
+              {%- set _ = errors.append(fs.5 ~ ' (' ~ (fs_free_kb / 1024 / 1024) | round(2) ~ 'GB free, needs ' ~ min_free_gb ~ 'GB)') -%}
+            {%- endif -%}
+          {%- endfor -%}
+          {{- errors | join('\n') -}}
+
+    - name: Display insufficient disk space detected
+      vars:
+        display_msg: "Insufficient disk space detected:\\n{% if error_message %}{{ error_message }}{% endif %}"
+      ansible.builtin.debug:
+        msg: "{{ display_msg.split('\\n') }}"
+      when: error_message != ""
+
+    - name: Fail if any filesystem is below threshold
+      ansible.builtin.fail:
+        msg: "INSUFFICIENT DISK SPACE DETECTED"
+      when: error_message != ""
+
