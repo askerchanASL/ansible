@@ -43,7 +43,7 @@
       var: disk_space.stdout_lines
 
   - name: Copy files to network share using UNC path with debug output
-    win_shell:      
+    win_shell: |     
       $hostname = "{{ clean_hostname }}"
       $src1 = "C:\Temp\running_services_{{ clean_hostname }}.txt"
       $src2 = "C:\Temp\disk_space_{{ clean_hostname }}.txt"
