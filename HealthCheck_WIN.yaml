@@ -2,31 +2,38 @@
 - name: Windows Server Health Check
   hosts: all
   gather_facts: yes
+
   tasks:
     - name: Gather system facts
       ansible.builtin.setup: null
+
     - name: Get hostname
       win_shell: hostname
       register: hostname_result
+
     - name: Clean hostname (remove newline)
       set_fact:
         clean_hostname: "{{ hostname_result.stdout | trim }}"
-        src1: C:\Temp\running_services_{{ clean_hostname }}.txt
-        src2: C:\Temp\disk_space_{{ clean_hostname }}.txt
-        dst1: \\172.16.17.40\Patch\running_services_{{ clean_hostname }}.txt
-        dst2: \\172.16.17.40\Patch\disk_space_{{ clean_hostname }}.txt
+        src1: "C:\\Temp\\running_services_{{ clean_hostname }}.txt"
+        src2: "C:\\Temp\\disk_space_{{ clean_hostname }}.txt"
+        dst1: "\\\\172.16.17.40\\Patch\\running_services_{{ clean_hostname }}.txt"
+        dst2: "\\\\172.16.17.40\\Patch\\disk_space_{{ clean_hostname }}.txt"
+
     - name: Get list of running services
       win_shell: >
         Get-Service | Where-Object {$_.Status -eq "Running"} | Select-Object
         Name, DisplayName, Status
       register: running_services
+
     - name: Save running services to a file
-      win_copy:
+      win_file:
         content: "{{ running_services.stdout }}"
-        dest: C:\Temp\running_services_{{ clean_hostname }}.txt
+        dest: "C:\\Temp\\running_services_{{ clean_hostname }}.txt"
+
     - name: Display running services
       debug:
         var: running_services.stdout_lines
+
     - name: Check disk space
       win_shell: >
         Get-PSDrive -PSProvider FileSystem | Select-Object Name,
@@ -35,25 +42,39 @@
         @{Name="Total(GB)";Expression={[math]::round($_.Used/1GB,2) +
         [math]::round($_.Free/1GB,2)}}
       register: disk_space
+
     - name: Save disk space to a file
       win_copy:
         content: "{{ disk_space.stdout }}"
-        dest: C:\Temp\disk_space_{{ clean_hostname }}.txt
+        dest: "C:\\Temp\\disk_space_{{ clean_hostname }}.txt"
+
     - name: Display disk space
       debug:
         var: disk_space.stdout_lines
-    - name: Copy files to network share using UNC path with debug output
-      ansible.windows.win_powershell:
-        $hostname = {{ clean_hostname }}
 
-        Copy-Item -Path "{{src1}}" -Destination "{{dst1}}" -Force -ErrorAction Stop
-
-        Copy-Item -Path "{{src2}}" -Destination "{{dst1}}" -Force -ErrorAction Stop
+    - name: Copy files to network share using UNC path
+      win_powershell:
+        script: |
+          $src1 = "{{ src1 }}"
+          $src2 = "{{ src2 }}"
+          $dst1 = "{{ dst1 }}"
+          $dst2 = "{{ dst2 }}"
+          try {
+            Copy-Item -Path $src1 -Destination $dst1 -Force -ErrorAction Stop
+            Write-Output "SUCCESS: Copied $src1 to $dst1"
+          } catch {
+            Write-Output "ERROR copying $src1 to $dst1: $($_.Exception.Message)"
+          }
+          try {
+            Copy-Item -Path $src2 -Destination $dst2 -Force -ErrorAction Stop
+            Write-Output "SUCCESS: Copied $src2 to $dst2"
+          } catch {
+            Write-Output "ERROR copying $src2 to $dst2: $($_.Exception.Message)"
+          }
       register: copy_output
-      args: executable:powershell
+      args:
+        executable: powershell
+
     - name: Show copy debug output
       debug:
         var: copy_output.stdout_lines
-    - name: Show debug msg
-      debug:
-        msg: "{{copy_output.stdout}}"
