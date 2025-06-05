@@ -35,17 +35,17 @@
         var: disk_space.stdout_lines
 
     - name: Copy files to network share using UNC path
-    win_shell: |
-      $username = "DOMAIN\\username"
-      $password = ConvertTo-SecureString "your_password" -AsPlainText -Force
-      $cred = New-Object System.Management.Automation.PSCredential($username, $password)
+      win_shell: |
+        $username = "DOMAIN\\username"
+        $password = ConvertTo-SecureString "your_password" -AsPlainText -Force
+        $cred = New-Object System.Management.Automation.PSCredential($username, $password)
 
-      $session = New-PSSession -ComputerName 172.16.17.40 -Credential $cred
-      Invoke-Command -Session $session -ScriptBlock {
-        Copy-Item -Path "C:\Temp\running_services.txt" -Destination "\\172.16.17.40\patch\running_services.txt" -Force
-        Copy-Item -Path "C:\Temp\disk_space.txt" -Destination "\\172.16.17.40\patch\disk_space.txt" -Force
-      }
-      Remove-PSSession -Session $session
+        $session = New-PSSession -ComputerName 172.16.17.40 -Credential $cred
+        Invoke-Command -Session $session -ScriptBlock {
+          Copy-Item -Path "C:\Temp\running_services.txt" -Destination "\\172.16.17.40\patch\running_services.txt" -Force
+          Copy-Item -Path "C:\Temp\disk_space.txt" -Destination "\\172.16.17.40\patch\disk_space.txt" -Force
+        }
+        Remove-PSSession -Session $session
 
 
 
