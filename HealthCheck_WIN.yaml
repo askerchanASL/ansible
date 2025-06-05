@@ -10,6 +10,10 @@
       win_shell: hostname
       register: hostname_result
 
+    - name: Clean hostname (remove newline)
+      set_fact:
+        clean_hostname: "{{ hostname_result.stdout | trim }}"
+
     - name: Get list of running services
       win_shell: |
         Get-Service | Where-Object {$_.Status -eq "Running"} | Select-Object Name, DisplayName, Status
@@ -18,7 +22,7 @@
     - name: Save running services to a file
       win_copy:
         content: "{{ running_services.stdout }}"
-        dest: "C:\\Temp\\running_services_{{ hostname_result.stdout }}.txt"
+        dest: "C:\\Temp\\running_services_{{ clean_hostname }}.txt"
 
     - name: Display running services
       debug:
@@ -32,7 +36,7 @@
     - name: Save disk space to a file
       win_copy:
         content: "{{ disk_space.stdout }}"
-        dest: "C:\\Temp\\disk_space_{{ hostname_result.stdout }}.txt"
+        dest: "C:\\Temp\\disk_space_{{ clean_hostname }}.txt"
 
     - name: Display disk space
       debug:
@@ -40,18 +44,15 @@
 
     - name: Copy files to network share using UNC path
       win_shell: |
-        $hostname = "{{ hostname_result.stdout }}"
+        $hostname = "{{ clean_hostname }}"
         $username = "DOMAIN\\username"
         $password = ConvertTo-SecureString "your_password" -AsPlainText -Force
         $cred = New-Object System.Management.Automation.PSCredential($username, $password)
 
-        $source1 = "C:\\Temp\\running_services_${hostname}.txt"
-        $source2 = "C:\\Temp\\disk_space_${hostname}.txt"
-        $dest1 = "\\\\172.16.17.40\\patch\\running_services_${hostname}.txt"
-        $dest2 = "\\\\172.16.17.40\\patch\\disk_space_${hostname}.txt"
+        $src1 = "C:\\Temp\\running_services_${hostname}.txt"
+        $src2 = "C:\\Temp\\disk_space_${hostname}.txt"
+        $dst1 = "\\\\172.16.17.40\\patch\\running_services_${hostname}.txt"
+        $dst2 = "\\\\172.16.17.40\\patch\\disk_space_${hostname}.txt"
 
-        Invoke-Command -ComputerName 172.16.17.40 -Credential $cred -ScriptBlock {
-          param($src1, $src2, $dst1, $dst2)
-          Copy-Item -Path $src1 -Destination $dst1 -Force
-          Copy-Item -Path $src2 -Destination $dst2 -Force
-        } -ArgumentList $source1, $source2, $dest1, $dest2
+        Copy-Item -Path $src1 -Destination $dst1 -Force -Credential $cred
+        Copy-Item -Path $src2 -Destination $dst2 -Force -Credential $cred
