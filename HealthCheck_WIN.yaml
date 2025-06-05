@@ -1,6 +1,6 @@
 ---
 - name: Windows Server Health Check
-  hosts: windows_servers
+  hosts: all
   gather_facts: yes
   tasks:
 
