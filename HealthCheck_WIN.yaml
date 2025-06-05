@@ -49,6 +49,8 @@
         $src2 = "C:\\Temp\\disk_space_${hostname}.txt"
         $dst1 = "\\\\172.16.17.40\\patch\\running_services_${hostname}.txt"
         $dst2 = "\\\\172.16.17.40\\patch\\disk_space_${hostname}.txt"
+        Write-Host "Copying $src1 to $dst1"
+        Write-Host "Copying $src2 to $dst2"
 
-        Copy-Item -Path $src1 -Destination $dst1 -Force
-        Copy-Item -Path $src2 -Destination $dst2 -Force
+        #Copy-Item -Path $src1 -Destination $dst1 -Force
+        #Copy-Item -Path $src2 -Destination $dst2 -Force
