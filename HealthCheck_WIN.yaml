@@ -68,14 +68,14 @@
         Copy-Item -Path $src1 -Destination $dst1 -Force -ErrorAction Stop
         $output += "SUCCESS: Copied $src1 to $dst1"
       } catch {
-        $output += "ERROR copying $src1 to $dst1: $_"
+        $output += "ERROR copying $src1 to $dst1: ${_}"
       }
 
       try {
         Copy-Item -Path $src2 -Destination $dst2 -Force -ErrorAction Stop
         $output += "SUCCESS: Copied $src2 to $dst2"
       } catch {
-        $output += "ERROR copying $src2 to $dst2: $_"
+        $output += "ERROR copying $src2 to $dst2: ${_}"
       }
 
       $output | Out-String
