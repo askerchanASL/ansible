@@ -1,0 +1,39 @@
+- name: Take VMware VM snapshots
+  hosts: localhost
+  gather_facts: false
+  vars:
+    vcenter_hostname: "{{ hostvars[inventory_hostname]['vcenter_host'] }}"
+    vcenter_username: "{{ lookup('env', 'VMWARE_USER') }}"
+    vcenter_password: "{{ lookup('env', 'VMWARE_PASSWORD') }}"
+    validate_certs: false
+
+    vm_names:
+      - "jlam-dhcp-server2"
+      - "jlam-temp-ws"
+
+    snapshot_name: "Take snapshot before patching {{ ansible_date_time.iso8601 }}"
+    snapshot_description: "Snapshot taken before software patching"
+    snapshot_memory: false
+    snapshot_quiesce: false
+
+  tasks:
+    - name: Create snapshots for specified VMs
+      community.vmware.vmware_guest_snapshot:
+        hostname: "{{ vcenter_hostname }}"
+        username: "{{ vcenter_username }}"
+        password: "{{ vcenter_password }}"
+        validate_certs: "{{ validate_certs }}"
+        datacenter: "DC1"
+        folder: "/"
+        name: "{{ item }}"
+        state: "present"
+        snapshot_name: "{{ snapshot_name }}"
+        description: "{{ snapshot_description }}"
+        memory_dump: "{{ snapshot_memory }}"
+        quiesce: "{{ snapshot_quiesce }}"
+      loop: "{{ vm_names }}"
+      register: snapshot_results
+
+    - name: Display snapshot results
+      debug:
+        var: snapshot_results.results
