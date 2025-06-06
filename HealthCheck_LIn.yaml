@@ -1,0 +1,53 @@
+---
+- name: Export running services to public UNC path and show in stdout
+  hosts: all
+  become: yes
+  vars:
+    unc_path: "//172.16.17.60/Patch"  # Replace with your public UNC path
+    mount_point: "/mnt/share"
+    output_file: "running_services_{{ ansible_hostname }}.txt"
+
+  tasks:
+    - name: Ensure cifs-utils is installed (Debian-based)
+      apt:
+        name: cifs-utils
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Ensure cifs-utils is installed (RedHat-based)
+      yum:
+        name: cifs-utils
+        state: present
+      when: ansible_os_family == "RedHat"
+
+    - name: Create mount point directory
+      file:
+        path: "{{ mount_point }}"
+        state: directory
+        mode: '0755'
+
+    - name: Mount public UNC share (no credentials)
+      mount:
+        path: "{{ mount_point }}"
+        src: "{{ unc_path }}"
+        fstype: cifs
+        opts: "guest,rw"
+        state: mounted
+
+    - name: Get running services
+      shell: systemctl list-units --type=service --state=running
+      register: running_services
+
+    - name: Show running services in stdout
+      debug:
+        msg: "{{ running_services.stdout_lines }}"
+
+    - name: Write running services to file on mounted share
+      copy:
+        content: "{{ running_services.stdout }}"
+        dest: "{{ mount_point }}/{{ output_file }}"
+
+    - name: Unmount UNC share
+      mount:
+        path: "{{ mount_point }}"
+        state: unmounted
