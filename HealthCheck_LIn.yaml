@@ -3,7 +3,7 @@
   hosts: all
   become: yes
   vars:
-    unc_path: "//172.16.17.60/Patch"  # Replace with your public UNC path
+    unc_path: "//172.16.17.40/Patch"  # Replace with your public UNC path
     mount_point: "/mnt/share"
     output_file: "running_services_{{ ansible_hostname }}.txt"
 
