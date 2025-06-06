@@ -1,17 +1,23 @@
+---
 - name: Take VMware VM snapshots
   hosts: localhost
-  gather_facts: false
+  gather_facts: true
   vars:
-    vcenter_hostname: "{{ hostvars[inventory_hostname]['vcenter_host'] }}"
-    vcenter_username: "{{ lookup('env', 'VMWARE_USER') }}"
-    vcenter_password: "{{ lookup('env', 'VMWARE_PASSWORD') }}"
+    vcenter_hostname: "172.16.13.100"
+    vcenter_username: "askerchan@vsphere.local"
+    vcenter_password: "P@ssw0rd"
     validate_certs: false
-
+    
+    # List of VMs to snapshot (can be name, UUID, or moid)
+    vm_names:
+      - "AskerChan_NATServer2"
+      - "AskerChan_Nomination"
+    
     snapshot_name: "Take snapshot before patching {{ ansible_date_time.iso8601 }}"
     snapshot_description: "Snapshot taken before software patching"
-    snapshot_memory: false
-    snapshot_quiesce: false
-
+    snapshot_memory: false   # Set to true to include VM memory state
+    snapshot_quiesce: false  # Set to true to quiesce the filesystem
+    
   tasks:
     - name: Create snapshots for specified VMs
       community.vmware.vmware_guest_snapshot:
@@ -19,7 +25,7 @@
         username: "{{ vcenter_username }}"
         password: "{{ vcenter_password }}"
         validate_certs: "{{ validate_certs }}"
-        datacenter: "ASL MVS Datacenter"
+        datacenter: "DC1"
         folder: "/"
         name: "{{ item }}"
         state: "present"
@@ -27,9 +33,10 @@
         description: "{{ snapshot_description }}"
         memory_dump: "{{ snapshot_memory }}"
         quiesce: "{{ snapshot_quiesce }}"
-      loop: "{{ hostvars[inventory_hostname]['vm_names'] }}"
+      with_items: "{{ vm_names }}"
       register: snapshot_results
-
+      ignore_errors: yes
+    
     - name: Display snapshot results
       debug:
         var: snapshot_results.results
