@@ -1,6 +1,6 @@
 ---
 - name: Export running services to UNC path and show in stdout
-  hosts: linux_servers
+  hosts: all
   become: yes
   vars:
     unc_path: "//172.16.17.40/Patch"  # Replace with your actual UNC path
