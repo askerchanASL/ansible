@@ -1,50 +1,11 @@
 ---
-- name: Export running services to UNC path and show in stdout
+- name: List running services and show in stdout
   hosts: all
   become: yes
   vars:
-    unc_path: "//172.16.17.40/Patch"  # Replace with your actual UNC path
-    mount_point: "/mnt/share"
-    smb_user: "Dev\administrator"  # Replace with your SMB username
-    smb_pass: "P@ssw0rd"  # Replace with your SMB password
-    cred_file: "/root/.smbcredentials"
     output_file: "running_services_{{ ansible_hostname }}.txt"
 
   tasks:
-    - name: Ensure cifs-utils is installed (Debian-based)
-      apt:
-        name: cifs-utils
-        state: present
-      when: ansible_os_family == "Debian"
-
-    - name: Ensure cifs-utils is installed (RedHat-based)
-      yum:
-        name: cifs-utils
-        state: present
-      when: ansible_os_family == "RedHat"
-
-    - name: Create mount point directory
-      file:
-        path: "{{ mount_point }}"
-        state: directory
-        mode: '0755'
-
-    - name: Create CIFS credentials file
-      copy:
-        dest: "{{ cred_file }}"
-        content: |
-          username={{ smb_user }}
-          password={{ smb_pass }}
-        mode: '0600'
-
-    - name: Mount UNC share using credentials file
-      mount:
-        path: "{{ mount_point }}"
-        src: "{{ unc_path }}"
-        fstype: cifs
-        opts: "credentials={{ cred_file }},rw,vers=3.0"
-        state: mounted
-
     - name: Get running services
       shell: systemctl list-units --type=service --state=running
       register: running_services
@@ -52,18 +13,3 @@
     - name: Show running services in stdout
       debug:
         msg: "{{ running_services.stdout_lines }}"
-
-    - name: Write running services to file on mounted share
-      copy:
-        content: "{{ running_services.stdout }}"
-        dest: "{{ mount_point }}/{{ output_file }}"
-
-    - name: Unmount UNC share
-      mount:
-        path: "{{ mount_point }}"
-        state: unmounted
-
-    - name: Remove credentials file for security
-      file:
-        path: "{{ cred_file }}"
-        state: absent
