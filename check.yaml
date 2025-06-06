@@ -60,29 +60,8 @@
         var: disk_space.stdout_lines
 
     - name: Copy files to network share using UNC path
-      win_shell: |
-        $src1 = "{{ src1 }}"
-        $src2 = "{{ src2 }}"
-        $dst1 = "{{ dst1 }}"
-        $dst2 = "{{ dst2 }}"
-        try {
-          Copy-Item -Path "{{ src1 }}" -Destination "{{ dst1 }}" -Force -ErrorAction Stop
-          Write-Output "SUCCESS: Copied "{{ src1 }}" to "{{ dst1 }}"
-        } catch {
-          Write-Output "ERROR copying "{{ src1 }}" to "{{ dst1 }}": $($_.Exception.Message)"
-        }
-        try {
-          Copy-Item -Path "{{ src2 }}" -Destination "{{ dst2 }}" -Force -ErrorAction Stop
-          Write-Output "SUCCESS: Copied "{{ src2 }}" to "{{ dst2 }}"
-        } catch {
-          Write-Output "ERROR copying "{{ src2 }}" to "{{ dst2 }}": $($_.Exception.Message)"
-        }
-      register: copy_output
-      vars:
-        src1: "C:\\Temp\\running_services_{{ clean_hostname }}.txt"
-        src2: "C:\\Temp\\disk_space_{{ clean_hostname }}.txt"
-        dst1: "\\\\172.16.17.40\\Patch\\running_services_{{ clean_hostname }}.txt"
-        dst2: "\\\\172.16.17.40\\Patch\\disk_space_{{ clean_hostname }}.txt"
+      win_shell: powershell.exe -ExecutionPolicy Bypass -File "C:\\Temp\\Copy-Files.ps1"
+        
 
     - name: Show copy debug output
       debug:
