@@ -1,10 +1,13 @@
 ---
-- name: Export running services to public UNC path and show in stdout
-  hosts: all
+- name: Export running services to UNC path and show in stdout
+  hosts: linux_servers
   become: yes
   vars:
-    unc_path: "//172.16.17.40/Patch"  # Replace with your public UNC path
+    unc_path: "//172.16.17.40/Patch"  # Replace with your actual UNC path
     mount_point: "/mnt/share"
+    smb_user: "Dev\administrator"  # Replace with your SMB username
+    smb_pass: "P@ssw0rd"  # Replace with your SMB password
+    cred_file: "/root/.smbcredentials"
     output_file: "running_services_{{ ansible_hostname }}.txt"
 
   tasks:
@@ -26,12 +29,20 @@
         state: directory
         mode: '0755'
 
-    - name: Mount public UNC share (no credentials)
+    - name: Create CIFS credentials file
+      copy:
+        dest: "{{ cred_file }}"
+        content: |
+          username={{ smb_user }}
+          password={{ smb_pass }}
+        mode: '0600'
+
+    - name: Mount UNC share using credentials file
       mount:
         path: "{{ mount_point }}"
         src: "{{ unc_path }}"
         fstype: cifs
-        opts: "guest,rw"
+        opts: "credentials={{ cred_file }},rw,vers=3.0"
         state: mounted
 
     - name: Get running services
@@ -51,3 +62,8 @@
       mount:
         path: "{{ mount_point }}"
         state: unmounted
+
+    - name: Remove credentials file for security
+      file:
+        path: "{{ cred_file }}"
+        state: absent
