@@ -7,10 +7,6 @@
     vcenter_password: "{{ lookup('env', 'VMWARE_PASSWORD') }}"
     validate_certs: false
 
-    vm_names:
-      - "jlam-dhcp-server2"
-      - "jlam-temp-ws"
-
     snapshot_name: "Take snapshot before patching {{ ansible_date_time.iso8601 }}"
     snapshot_description: "Snapshot taken before software patching"
     snapshot_memory: false
@@ -23,7 +19,7 @@
         username: "{{ vcenter_username }}"
         password: "{{ vcenter_password }}"
         validate_certs: "{{ validate_certs }}"
-        datacenter: "DC1"
+        datacenter: "ASL MVS Datacenter"
         folder: "/"
         name: "{{ item }}"
         state: "present"
@@ -31,7 +27,7 @@
         description: "{{ snapshot_description }}"
         memory_dump: "{{ snapshot_memory }}"
         quiesce: "{{ snapshot_quiesce }}"
-      loop: "{{ vm_names }}"
+      loop: "{{ hostvars[inventory_hostname]['vm_names'] }}"
       register: snapshot_results
 
     - name: Display snapshot results
