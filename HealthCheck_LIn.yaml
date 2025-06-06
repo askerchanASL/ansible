@@ -1,5 +1,5 @@
 ---
-- name: List running services and show in stdout
+- name: List running services and disk usage
   hosts: all
   become: yes
   vars:
@@ -13,3 +13,11 @@
     - name: Show running services in stdout
       debug:
         msg: "{{ running_services.stdout_lines }}"
+
+    - name: Get disk space usage
+      shell: df -h
+      register: disk_usage
+
+    - name: Show disk space usage in stdout
+      debug:
+        msg: "{{ disk_usage.stdout_lines }}"
