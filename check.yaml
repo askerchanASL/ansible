@@ -2,6 +2,10 @@
 - name: Windows Server Health Check
   hosts: all
   gather_facts: no
+  vars:
+    local_repo_path: /tmp/WindowsAgent
+    repo_url: "https://asker.chan:glpat-3p3-sFSmQJJtRNe5_AZL@gitlab.as1nfra.com/asker.chan/ansible.git"
+    
 
   tasks:
 
