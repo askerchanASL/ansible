@@ -2,22 +2,25 @@
 - name: Take VMware VM snapshots
   hosts: localhost
   gather_facts: true
+  collections:
+    - community.vmware
+
   vars:
     vcenter_hostname: "172.16.13.100"
     vcenter_username: "askerchan@vsphere.local"
     vcenter_password: "P@ssw0rd"
     validate_certs: false
-    
-    # List of VMs to snapshot (can be name, UUID, or moid)
+
+    # List of VMs to snapshot
     vm_names:
       - "AskerChan_NATServer2"
       - "AskerChan_Nomination"
-    
+
     snapshot_name: "Take snapshot before patching {{ ansible_date_time.iso8601 }}"
     snapshot_description: "Snapshot taken before software patching"
-    snapshot_memory: false   # Set to true to include VM memory state
-    snapshot_quiesce: false  # Set to true to quiesce the filesystem
-    
+    snapshot_memory: false
+    snapshot_quiesce: false
+
   tasks:
     - name: Create snapshots for specified VMs
       community.vmware.vmware_guest_snapshot:
@@ -33,10 +36,10 @@
         description: "{{ snapshot_description }}"
         memory_dump: "{{ snapshot_memory }}"
         quiesce: "{{ snapshot_quiesce }}"
-      with_items: "{{ vm_names }}"
+      loop: "{{ vm_names }}"
       register: snapshot_results
       ignore_errors: yes
-    
+
     - name: Display snapshot results
       debug:
         var: snapshot_results.results
