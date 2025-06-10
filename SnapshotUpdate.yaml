@@ -19,9 +19,9 @@
   tasks:
     - name: Create snapshots for specified VMs
       community.vmware.vmware_guest_snapshot:
-        hostname: "{{ lookup('ansible.builtin.env', VMWARE_HOST }}"
-        username: "{{ lookup('ansible.builtin.env', VMWARE_USER }}"
-        password: "{{ lookup('ansible.builtin.env', VMWARE_PASSWORD }}"
+        hostname: "{{ lookup('ansible.builtin.env', 'VMWARE_HOST' }}"
+        username: "{{ lookup('ansible.builtin.env', 'VMWARE_USER' }}"
+        password: "{{ lookup('ansible.builtin.env', 'VMWARE_PASSWORD' }}"
         validate_certs: "{{ lookup('ansible.builtin.env', VMWARE_VALIDATE_CERTS | default(false) }}"
         datacenter: "DC1"
         folder: "/"
