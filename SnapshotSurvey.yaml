@@ -7,7 +7,7 @@
 
   vars:
     # These are safe to define here
-    vC_Host: '{{ _vCHOST) }}'
+    vC_Host: '{{ vCHOST }}'
     vC_Usr: '{{ lookup("env", "VMWARE_USER") }}'
     vC_Pwd: '{{ lookup("env", "VMWARE_PASSWORD") }}'
     vm_names:
