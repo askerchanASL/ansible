@@ -1,0 +1,43 @@
+---
+- name: Take VMware VM snapshots
+  hosts: localhost
+  gather_facts: true
+  collections:
+    - community.vmware
+
+  vars:
+    # These are safe to define here
+    vC_Host: '{{ "_vCHOST) }}'
+    vC_Usr: '{{ lookup("env", "VMWARE_USER") }}'
+    vC_Pwd: '{{ lookup("env", "VMWARE_PASSWORD") }}'
+    vm_names:
+      - "AskerChan_NATServer"
+      - "AskerChan_Nomination"
+
+    snapshot_name: "Take snapshot before patching {{ ansible_date_time.iso8601 }}"
+    snapshot_description: "Snapshot taken before software patching"
+    snapshot_memory: false
+    snapshot_quiesce: false
+
+  tasks:
+    - name: Create snapshots for specified VMs
+      community.vmware.vmware_guest_snapshot:
+        hostname: "{{ vC_Host }}"
+        username: "{{ vC_Usr }}"
+        password: "{{ vC_Pwd }}"
+        validate_certs: false
+        datacenter: "DC1"
+        folder: "/"
+        name: "{{ item }}"
+        state: "present"
+        snapshot_name: "{{ snapshot_name }}"
+        description: "{{ snapshot_description }}"
+        memory_dump: "{{ snapshot_memory }}"
+        quiesce: "{{ snapshot_quiesce }}"
+      loop: "{{ vm_names }}"
+      register: snapshot_results
+      ignore_errors: yes
+
+    - name: Display snapshot results
+      debug:
+        var: snapshot_results.results
