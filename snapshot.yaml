@@ -13,7 +13,7 @@
 
     # List of VMs to snapshot
     vm_names:
-      - "AskerChan_NATServer2"
+      - "AskerChan_NATServer"
       - "AskerChan_Nomination"
 
     snapshot_name: "Take snapshot before patching {{ ansible_date_time.iso8601 }}"
