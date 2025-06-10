@@ -3,8 +3,8 @@
   hosts: localhost
   gather_facts: yes
   vars:
-    vcenter_hostname: "172.16.181.84"
-    vcenter_username: "administrator@jasper.local"
+    vcenter_hostname: "172.16.13.100"
+    vcenter_username: "administrator@vsphere.local"
     vcenter_password: "P@ssw0rd"
     validate_certs: false
     
