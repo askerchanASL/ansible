@@ -8,21 +8,13 @@
     vC_Host: '{{ vCHOST }}'
     vC_Usr: '{{ lookup("env", "VMWARE_USER") }}'
     vC_Pwd: '{{ lookup("env", "VMWARE_PASSWORD") }}'
-
-    # vm_names will be passed in via survey
+    vm_names: "{{ vm_names_raw.split(',') | map('trim') | list }}"
     snapshot_name: "Take snapshot before patching {{ ansible_date_time.iso8601 }}"
     snapshot_description: "Snapshot taken before software patching"
     snapshot_memory: false
     snapshot_quiesce: false
 
   tasks:
-    - name: Ensure vm_names is defined
-      assert:
-        that:
-          - vm_names is defined
-          - vm_names | length > 0
-        fail_msg: "You must provide at least one VM name via the survey."
-
     - name: Create snapshots for specified VMs
       community.vmware.vmware_guest_snapshot:
         hostname: "{{ vC_Host }}"
