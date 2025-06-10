@@ -25,7 +25,7 @@
         hostname: "{{ vC_Host) }}"
         username: "{{ vC_Usr) }}"
         password: "{{ vC_Pwd }}"
-        validate_certs: "{{ lookup("env", "VMWARE_VALIDATE_CERTS") }}"
+        validate_certs: false
         datacenter: "DC1"
         folder: "/"
         name: "{{ item }}"
