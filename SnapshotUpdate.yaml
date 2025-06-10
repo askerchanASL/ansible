@@ -22,8 +22,8 @@
   tasks:
     - name: Create snapshots for specified VMs
       community.vmware.vmware_guest_snapshot:
-        hostname: "{{ vC_Host) }}"
-        username: "{{ vC_Usr) }}"
+        hostname: "{{ vC_Host }}"
+        username: "{{ vC_Usr }}"
         password: "{{ vC_Pwd }}"
         validate_certs: false
         datacenter: "DC1"
