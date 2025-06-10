@@ -19,10 +19,10 @@
   tasks:
     - name: Create snapshots for specified VMs
       community.vmware.vmware_guest_snapshot:
-        hostname: "{{ 'VMWARE_HOST' }}"
-        username: "{{ 'VMWARE_USER' }}"
-        password: "{{ 'VMWARE_PASSWORD' }}"
-        validate_certs: "{{ 'VMWARE_VALIDATE_CERTS' }}"
+        hostname: "{{ lookup('env', 'VMWARE_HOST' }}"
+        username: "{{ lookup('env', 'VMWARE_USER' }}"
+        password: "{{ lookup('env', 'VMWARE_PASSWORD' }}"
+        validate_certs: "{{ lookup('env', 'VMWARE_VALIDATE_CERTS' }}"
         datacenter: "DC1"
         folder: "/"
         name: "{{ item }}"
