@@ -6,8 +6,7 @@
     - community.vmware
 
   vars:
-    validate_certs: false
-
+    # These are safe to define here
     vm_names:
       - "AskerChan_NATServer"
       - "AskerChan_Nomination"
@@ -23,7 +22,7 @@
         hostname: "{{ VMWARE_HOST }}"
         username: "{{ VMWARE_USER }}"
         password: "{{ VMWARE_PASSWORD }}"
-        validate_certs: "{{ VMWARE_VALIDATE_CERTS }}"
+        validate_certs: "{{ VMWARE_VALIDATE_CERTS | default(false) }}"
         datacenter: "DC1"
         folder: "/"
         name: "{{ item }}"
