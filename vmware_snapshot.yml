@@ -1,0 +1,49 @@
+---
+- name: Take VMware VM snapshots
+  hosts: localhost
+  gather_facts: yes
+  vars:
+    vcenter_hostname: "172.16.181.84"
+    vcenter_username: "administrator@jasper.local"
+    vcenter_password: "P@ssw0rd"
+    validate_certs: false
+    
+    # List of VMs to snapshot
+    vm_names: "{{ successful_hosts | default('dummy') }}"
+    
+    snapshot_name: "Take snapshot before patching {{ ansible_date_time.iso8601 }}"
+    snapshot_description: "Snapshot taken before software patching"
+    snapshot_memory: false   # Set to true to include VM memory state
+    snapshot_quiesce: false  # Set to true to quiesce the filesystem
+    
+  tasks:
+    - name: Create snapshots for specified VMs
+      community.vmware.vmware_guest_snapshot:
+        hostname: "{{ vcenter_hostname }}"
+        username: "{{ vcenter_username }}"
+        password: "{{ vcenter_password }}"
+        validate_certs: "{{ validate_certs }}"
+        datacenter: "DC1"
+        folder: "/"
+        name: "{{ hostvars[item]['vm_name'] }}"
+        state: "present"
+        snapshot_name: "{{ snapshot_name }}"
+        description: "{{ snapshot_description }}"
+        memory_dump: "{{ snapshot_memory }}"
+        quiesce: "{{ snapshot_quiesce }}"
+      with_items: "{{ vm_names }}"
+      register: snapshot_results
+      ignore_errors: yes
+    
+    - name: Preparing snapshots result
+      ansible.builtin.set_fact:
+        formatted_output: |
+          {% for result in snapshot_results.results %}
+          server: {{ result.item }}, snapshot: {% if result.failed %}failed{% else %}success{% endif %}, vm_name: {{ 
+            result.invocation.module_args.name }}
+          {% endfor %}
+
+    - name: Display snapshots result
+      ansible.builtin.debug:
+        msg: "{{ formatted_output.split('\n') }}"
+
