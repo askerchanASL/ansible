@@ -19,10 +19,10 @@
   tasks:
     - name: Create snapshots for specified VMs
       community.vmware.vmware_guest_snapshot:
-        hostname: "{{ lookup('ee-minimal-rhel8-vmware', 'VMWARE_HOST' }}"
-        username: "{{ lookup('ee-minimal-rhel8-vmware', 'VMWARE_USER' }}"
-        password: "{{ lookup('ee-minimal-rhel8-vmware', 'VMWARE_PASSWORD' }}"
-        validate_certs: "{{ lookup('ee-minimal-rhel8-vmware', VMWARE_VALIDATE_CERTS | default(false) }}"
+        hostname: "{{ 'VMWARE_HOST' }}"
+        username: "{{ 'VMWARE_USER' }}"
+        password: "{{ 'VMWARE_PASSWORD' }}"
+        validate_certs: "{{ 'VMWARE_VALIDATE_CERTS' }}"
         datacenter: "DC1"
         folder: "/"
         name: "{{ item }}"
