@@ -5,6 +5,8 @@
   vars:
     ansible_user: "{{ selected_credential.username }}"
     ansible_password: "{{ selected_credential.password }}"
+    remote_user: "{{ selected_credential.username }}"
+    remote_password: "{{ selected_credential.password }}"
 
   tasks:
     - name: Get hostname
