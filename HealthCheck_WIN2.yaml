@@ -2,6 +2,10 @@
 - name: Windows Server Health Check
   hosts: all
   gather_facts: false
+  vars:
+    ansible_user: "{{ selected_credential.username }}"
+    ansible_password: "{{ selected_credential.password }}"
+
   tasks:
     - name: Get hostname
       win_shell: hostname
