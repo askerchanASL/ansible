@@ -1,0 +1,43 @@
+---
+- name: Windows Server Health Check
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Get hostname
+      win_shell: hostname
+      register: hostname_result
+
+    - name: Debug hostname result
+      debug:
+        var: hostname_result.stdout
+
+    - name: Clean hostname (remove newline)
+      set_fact:
+        clean_hostname: "{{ hostname_result.stdout | trim }}"
+
+    - name: Debug clean hostname
+      debug:
+        var: clean_hostname
+
+    - name: Get list of running services
+      win_shell: >
+        Get-Service | Where-Object {$_.Status -eq "Running"} | Select-Object
+        Name, DisplayName, Status
+      register: running_services
+
+    - name: Display running services
+      debug:
+        var: running_services.stdout_lines
+
+    - name: Check disk space
+      win_shell: >
+        Get-PSDrive -PSProvider FileSystem | Select-Object Name,
+        @{Name="Used(GB)";Expression={[math]::round($_.Used/1GB,2)}},
+        @{Name="Free(GB)";Expression={[math]::round($_.Free/1GB,2)}},
+        @{Name="Total(GB)";Expression={[math]::round($_.Used/1GB,2) +
+        [math]::round($_.Free/1GB,2)}}
+      register: disk_space
+
+    - name: Display disk space
+      debug:
+        var: disk_space.stdout_lines
