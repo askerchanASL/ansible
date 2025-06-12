@@ -3,8 +3,8 @@
   hosts: all
   gather_facts: false
   vars:
-    ansible_user: "{{ "administrator@ASL04233.ASLLAB" }}"
-    ansible_password: "{{ "P@ssw0rd" }}"
+    ansible_user: "{{ 'administrator@ASL04233.ASLLAB' }}"
+    ansible_password: "{{ 'P@ssw0rd' }}"
 
 
   tasks:
