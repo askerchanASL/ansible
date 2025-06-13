@@ -7,7 +7,7 @@
   vars:
     install_dir: C:\TEMP\UEMSAgent\WindowsAgent
     local_repo_path: /tmp/WindowsAgent
-    repo_url: "https://{{ gitlab_username }}:{{ gitlab_token }}@gitlab.as1nfra.com/asker.chan/ansible.git"
+    repo_url: "https://{{ git_username }}:{{ git_token }}@gitlab.as1nfra.com/asker.chan/ansible.git"
 
   pre_tasks:
     - name: Load GitLab credentials from vault
