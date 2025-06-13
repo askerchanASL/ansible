@@ -9,7 +9,7 @@
 
 
 - name: Install UEMS Linux Agent on target machines
-  hosts: "{{selected_group}}"
+  hosts: "{{selected_group}}| default('all")"
   become: true
   vars:
     repo_dest: "/tmp/ME"
