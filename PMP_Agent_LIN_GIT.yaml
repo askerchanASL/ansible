@@ -1,5 +1,6 @@
 - name: Clone only LinuxAgent directory on AAP server
   hosts: localhost
+  connection: local
   gather_facts: no
   vars:
     repo_url: "https://{{git_user}}:{{git_password}}@gitlab.as1nfra.com/asker.chan/ansible.git"
