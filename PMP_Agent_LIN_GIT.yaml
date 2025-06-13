@@ -14,6 +14,8 @@
   vars:
     repo_dest: "/tmp/ME"
     ansibe_ssh_common_args: '-o StrictHostKeyChecking=no'
+    ansible_user: "{{ ansible_user }}"
+    ansible_password: "{{ ansible_password }}"
 
   tasks:
 
