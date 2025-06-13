@@ -13,6 +13,7 @@
   become: true
   vars:
     repo_dest: "/tmp/ME"
+    ansibe_ssh_common_args: '-o StrictHostKeyChecking=no'
 
   tasks:
 
