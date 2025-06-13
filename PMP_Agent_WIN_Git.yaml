@@ -7,9 +7,15 @@
   vars:
     install_dir: C:\TEMP\UEMSAgent\WindowsAgent
     local_repo_path: /tmp/WindowsAgent
-    repo_url: "https://asker.chan:glpat-3_45sxxhUH8Jd4nsRMYg@gitlab.as1nfra.com/asker.chan/ansible.git"
+    repo_url: "https://{{ gitlab_username }}:{{ gitlab_token }}@gitlab.as1nfra.com/asker.chan/ansible.git"
 
   pre_tasks:
+    - name: Load GitLab credentials from vault
+      delegate_to: localhost
+      run_once: true
+      ansible.builtin.include_vars:
+        file: vault.yml
+
     - name: Clone WindowsAgent directory from GitLab (run once)
       delegate_to: localhost
       run_once: true
