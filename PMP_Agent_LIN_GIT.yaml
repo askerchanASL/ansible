@@ -9,9 +9,7 @@
 
 
 - name: Install UEMS Linux Agent on target machines
-  hosts: "{{ selected_group }}"
-  ansible_connection: ssh
-  ansible_ssh_host_key_checking: false
+  hosts: "{{ selected_group | default('all') }}"  
   become: true
   vars:
     repo_dest: "/tmp/ME"
