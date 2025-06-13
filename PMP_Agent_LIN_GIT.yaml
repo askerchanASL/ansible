@@ -19,7 +19,7 @@
 
     - name: Make UEMS_LinuxAgent.bin executable
       ansible.builtin.file:
-        path: "{{ repo_dest }}/Autoinstall.sh"
+        path: "{{ repo_dest }}/AutoInstall.sh"
         mode: '0755'
 
     - name: Run the installer
