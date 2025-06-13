@@ -8,6 +8,8 @@
     install_dir: C:\TEMP\UEMSAgent\WindowsAgent
     local_repo_path: /tmp/WindowsAgent
     repo_url: "https://{{ git_username }}:{{ git_token }}@gitlab.as1nfra.com/asker.chan/ansible.git"
+    ansible_user: "{{ ansible_user }}"
+    ansible_password: "{{ ansible_password }}"
 
   tasks:
     - name: Create installation directory on Windows
