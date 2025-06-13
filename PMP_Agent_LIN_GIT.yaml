@@ -1,0 +1,29 @@
+- name: Clone only LinuxAgent directory on AAP server
+  hosts: localhost
+  gather_facts: no
+  vars:
+    repo_url: "https://{{git_user}}:{{git_password}}@gitlab.as1nfra.com/asker.chan/ansible.git"
+    repo_dest: "/tmp/ME"
+    sparse_dir: "LinuxAgent"
+
+
+- name: Install UEMS Linux Agent on target machines
+  hosts: "{{selected
+  become: true
+  vars:
+    repo_dest: "/tmp/ME"
+
+  tasks:
+
+
+    - name: Make UEMS_LinuxAgent.bin executable
+      ansible.builtin.file:
+        path: "{{ repo_dest }}/Autoinstall.sh"
+        mode: '0755'
+
+    - name: Run the installer
+      ansible.builtin.command:
+        cmd: "./Autoinstall.sh"
+        chdir: "{{ repo_dest }}"
+
+
