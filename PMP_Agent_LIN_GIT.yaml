@@ -24,7 +24,7 @@
 
     - name: Run the installer
       ansible.builtin.command:
-        cmd: "./Autoinstall.sh"
+        cmd: "./AutoInstall.sh"
         chdir: "{{ repo_dest }}"
 
 
