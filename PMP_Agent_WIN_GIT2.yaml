@@ -1,5 +1,5 @@
 - name: Install UEMSAgent
-  hosts: all
+  hosts: "{{ selected_group }}"
   gather_facts: no
   collections:
     - ansible.windows
