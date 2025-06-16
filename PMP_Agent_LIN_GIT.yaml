@@ -7,6 +7,38 @@
     repo_dest: "/tmp/ME"
     sparse_dir: "LinuxAgent"
 
+  tasks:
+    - name: Ensure destination directory exists
+      ansible.builtin.file:
+        path: "{{ repo_dest }}"
+        state: directory
+
+    - name: Initialize empty Git repo
+      ansible.builtin.command:
+        cmd: "git init"
+        chdir: "{{ repo_dest }}"
+
+    - name: Set remote origin
+      ansible.builtin.command:
+        cmd: "git remote add origin {{ repo_url }}"
+        chdir: "{{ repo_dest }}"
+
+    - name: Enable sparse checkout
+      ansible.builtin.command:
+        cmd: "git config core.sparseCheckout true"
+        chdir: "{{ repo_dest }}"
+
+    - name: Define sparse-checkout paths
+      ansible.builtin.copy:
+        dest: "{{ repo_dest }}/.git/info/sparse-checkout"
+        content: |
+          {{ sparse_dir }}
+
+    - name: Pull only the specified directory
+      ansible.builtin.command:
+        cmd: "git pull origin main"
+        chdir: "{{ repo_dest }}"
+
 
 - name: Install UEMS Linux Agent on target machines
   hosts: "{{ selected_group | default('all') }}"  
