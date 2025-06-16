@@ -7,6 +7,14 @@
     repo_dest: "/tmp/ME"
     sparse_dir: "LinuxAgent"
 
+  pre_tasks:
+    - name: Load GitLab credentials from vault
+      delegate_to: localhost
+      run_once: true
+      ansible.builtin.include_vars:
+        file: vault.yml
+
+
   tasks:
     - name: Ensure destination directory exists
       ansible.builtin.file:
