@@ -3,7 +3,7 @@
   connection: local
   gather_facts: no
   vars:
-    repo_url: "https://{{git_username}}:{{git_password}}@gitlab.as1nfra.com/askerchan/ansible.git"
+    repo_url: "https://{{ git_username }}:{{ git_token }}@gitlab.as1nfra.com/askerchan/ansible.git"
     repo_dest: "/tmp/ME"
     sparse_dir: "LinuxAgent"
 
