@@ -64,9 +64,7 @@
       become: true
       become_method: runas
       become_flags: logon_type=new_credentials logon_flags=netcredentials_only
-      vars:
-        ansible_become_user: "{{ ansible_user }}"
-        ansible_become_pass: "{{ ansible_password }}"
+
         
 
     - name: Show copy debug output
