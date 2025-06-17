@@ -60,6 +60,15 @@
 
   tasks:
 
+    - name: Copy UEMS Linux Agent to target
+      ansible.builtin.copy:
+        src: "/tmp/ME/LinuxAgent/"
+        dest: "{{ repo_dest }}/LinuxAgent/"
+        mode: '0755'
+        owner: root
+        group: root
+        remote_src: no
+
 
     - name: Make UEMS_LinuxAgent.bin executable
       ansible.builtin.file:
