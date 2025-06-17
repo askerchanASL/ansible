@@ -1,6 +1,6 @@
 ---
 - name: Windows Server Health Check
-  hosts: all
+  hosts: "{{ selected_group }}"
   gather_facts: no
   vars:
     local_repo_path: /tmp/WindowsAgent
