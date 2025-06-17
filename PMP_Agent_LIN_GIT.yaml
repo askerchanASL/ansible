@@ -72,12 +72,17 @@
 
     - name: Make UEMS_LinuxAgent.bin executable
       ansible.builtin.file:
-        path: "{{ repo_dest }}/AutoInstall.sh"
+        path: "{{ repo_dest }}/AutoInstall_v10.sh"
         mode: '0755'
 
     - name: Run the installer
       ansible.builtin.command:
-        cmd: "./AutoInstall.sh"
+        cmd: "./AutoInstall_v10.sh"
         chdir: "{{ repo_dest }}"
+
+    - name: Remove Folder
+      ansible.builtin.file:
+        path: "{{ repo_dest }}"
+        state: absent
 
 
