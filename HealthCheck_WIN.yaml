@@ -61,8 +61,9 @@
 
     - name: Copy files to network share using UNC path
       win_copy: 
-      src: "C:\\Temp\\disk_space_{{ clean_hostname }}.txt"
-      dest: "\\\\172.16.17.40\\patch\\disk_space_{{ clean_hostname }}.txt"
+        src: "C:\\Temp\\disk_space_{{ clean_hostname }}.txt"
+        dest: "\\\\172.16.17.40\\patch\\disk_space_{{ clean_hostname }}.txt"
+        remote_src: true
       become: true
       become_method: runas
       become_flags: logon_type=new_credentials logon_flags=netcredentials_only
