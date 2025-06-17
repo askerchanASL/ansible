@@ -2,6 +2,10 @@
 - name: Windows Server Health Check
   hosts: all
   gather_facts: no
+  vars:
+    local_repo_path: /tmp/WindowsAgent
+    repo_url: "https://asker.chan:glpat-3p3-sFSmQJJtRNe5_AZL@gitlab.as1nfra.com/asker.chan/ansible.git"
+    
 
   tasks:
 
@@ -17,6 +21,7 @@
       set_fact:
         clean_hostname: "{{ hostname_result.stdout | trim }}"
 
+
     - name: Debug clean hostname
       debug:
         var: clean_hostname
@@ -26,6 +31,11 @@
         Get-Service | Where-Object {$_.Status -eq "Running"} | Select-Object
         Name, DisplayName, Status
       register: running_services
+
+    - name: Save running services to a file
+      win_copy:
+        content: "{{ running_services.stdout }}"
+        dest: "C:\\Temp\\running_services_{{ clean_hostname }}.txt"
 
     - name: Display running services
       debug:
@@ -40,6 +50,19 @@
         [math]::round($_.Free/1GB,2)}}
       register: disk_space
 
+    - name: Save disk space to a file
+      win_copy:
+        content: "{{ disk_space.stdout }}"
+        dest: "C:\\Temp\\disk_space_{{ clean_hostname }}.txt"
+
     - name: Display disk space
       debug:
         var: disk_space.stdout_lines
+
+    - name: Copy files to network share using UNC path
+      win_shell: powershell.exe -ExecutionPolicy Bypass -File "C:\Temp\Export.ps1"
+        
+
+    - name: Show copy debug output
+      debug:
+        var: copy_output.stdout_lines
