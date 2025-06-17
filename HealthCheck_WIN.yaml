@@ -61,6 +61,8 @@
 
     - name: Copy files to network share using UNC path
       win_shell: powershell.exe -ExecutionPolicy Bypass -File "C:\Temp\Export.ps1"
+      become: yes
+      become_method: runas
         
 
     - name: Show copy debug output
