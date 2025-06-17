@@ -63,8 +63,9 @@
       win_shell: powershell.exe -ExecutionPolicy Bypass -File "C:\Temp\Export.ps1"
       become: yes
       become_method: runas
-      become_user: "{{ ansible_user }}"
-      become_pass: "{{ ansible_password }}"
+      become_flags: logon_type=new_credentials logon_flags=netcredentials_only
+      ansible_become_user: "{{ ansible_user }}"
+      ansible_become_pass: "{{ ansible_password }}"
         
 
     - name: Show copy debug output
