@@ -1,6 +1,6 @@
 ---
 - name: List running services and disk usage
-  hosts: all
+  hosts: "{{ selected_host }}"
   become: yes
   vars:
     output_file: "running_services_{{ ansible_hostname }}.txt"
