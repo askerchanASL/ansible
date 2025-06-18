@@ -1,32 +1,35 @@
+- name: List running services and disk usage
+  hosts: "{{ selected_host }}"
+  become: yes
+  vars:
+    output_file: "/tmp/running_services_{{ ansible_hostname }}.txt"
+    share_path: "\\\\172.16.17.40\\Patch"  # Replace with your actual share path
 
-- name: Export results to SMB share
-  hosts: "{{ selected_host }}"
-  become: yes
-  vars:
-    output_file: "/tmp/running_services_{{ ansible_hostname }}.txt"
-    smb_share: "//172.16.17.40/Patch"
-    smb_user: "{{ ansible_user }}"
-    smb_pass: "{{ ansible_password }}"
+  tasks:
+    - name: Get running services
+      shell: systemctl list-units --type=service --state=running
+      register: running_services
 
-  tasks:
-    - name: Get running services
-      shell: systemctl list-units --type=service --state=running
-      register: running_services
+    - name: Get disk space usage
+      shell: df -h
+      register: disk_usage
 
-    - name: Get disk space usage
-      shell: df -h
-      register: disk_usage
+    - name: Write output to file
+      copy:
+        content: |
+          Running Services:
+          {{ running_services.stdout }}
 
-    - name: Write output to file
-      copy:
-        content: |
-          Running Services:
-          {{ running_services.stdout }}
+          Disk Usage:
+          {{ disk_usage.stdout }}
+        dest: "{{ output_file }}"
 
-          Disk Usage:
-          {{ disk_usage.stdout }}
-        dest: "{{ output_file }}"
+    - name: Ensure share path exists
+      file:
+        path: "{{ share_path }}"
+        state: directory
 
-    - name: Copy file to SMB share using smbclient
-      shell: |
-        smbclient {{ smb_share }} "{{ smb_pass }}" -U {{ smb_user }} -c "put {{ output_file }} running_services_{{ ansible_hostname }}.txt"
+    - name: Copy output file to share path
+      copy:
+        src: "{{ output_file }}"
+        dest: "{{ share_path }}\\running_services_{{ ansible_hostname }}.txt"
