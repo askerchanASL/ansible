@@ -5,8 +5,8 @@
   vars:
     output_file: "/tmp/running_services_{{ ansible_hostname }}.txt"
     smb_share: "//172.16.17.40/Patch"
-    smb_user: "{{ansible_user}}"
-    smb_pass: "{{ansible_password}}"
+    smb_user: "{{ ansible_user }}"
+    smb_pass: "{{ ansible_password }}"
 
   tasks:
     - name: Get running services
