@@ -1,30 +1,17 @@
----
 - name: Windows Server Health Check
   hosts: "{{ selected_group }}"
   gather_facts: no
   vars:
     local_repo_path: /tmp/WindowsAgent
 
-    
-
   tasks:
-
     - name: Get hostname
       win_shell: hostname
       register: hostname_result
 
-    - name: Debug hostname result
-      debug:
-        var: hostname_result.stdout
-
     - name: Clean hostname (remove newline)
       set_fact:
         clean_hostname: "{{ hostname_result.stdout | trim }}"
-
-
-    - name: Debug clean hostname
-      debug:
-        var: clean_hostname
 
     - name: Get list of running services
       win_shell: >
@@ -36,10 +23,6 @@
       win_copy:
         content: "{{ running_services.stdout }}"
         dest: "C:\\Temp\\running_services_{{ clean_hostname }}.txt"
-
-    - name: Display running services
-      debug:
-        var: running_services.stdout_lines
 
     - name: Check disk space
       win_shell: >
@@ -55,25 +38,22 @@
         content: "{{ disk_space.stdout }}"
         dest: "C:\\Temp\\disk_space_{{ clean_hostname }}.txt"
 
-    - name: Display disk space
-      debug:
-        var: disk_space.stdout_lines
-
-    - name: Check Path
-      win_file:
-        path: '\\172.16.17.40\patch'
-        state: directory
-
     - name: Copy files to network share using UNC path
-      win_copy: 
-        src: "C:\\Temp\\disk_space_{{ clean_hostname }}.txt"
-        dest: "\\\\172.16.17.40\\patch\\disk_space_{{ clean_hostname }}.txt"
-        remote_src: true
+      block:
+        - name: Copy disk space file
+          win_copy: 
+            src: "C:\\Temp\\disk_space_{{ clean_hostname }}.txt"
+            dest: "\\\\172.16.17.40\\patch\\disk_space_{{ clean_hostname }}.txt"
+            remote_src: true
+
+        - name: Copy running services file
+          win_copy: 
+            src: "C:\\Temp\\running_services_{{ clean_hostname }}.txt"
+            dest: "\\\\172.16.17.40\\patch\\running_services_{{ clean_hostname }}.txt"
+            remote_src: true
       become: true
       become_method: runas
       become_flags: logon_type=new_credentials logon_flags=netcredentials_only
-      ansible_become_user: "administrator@dev.local"
-      ansible_become_pass: "P@ssw0rd"
-
-        
-
+      vars:
+        ansible_become_user: "administrator@dev.local"
+        ansible_become_pass: "P@ssw0rd"
