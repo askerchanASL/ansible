@@ -4,9 +4,7 @@
   gather_facts: no
   vars:
     local_repo_path: /tmp/WindowsAgent
-    repo_url: "https://asker.chan:glpat-3p3-sFSmQJJtRNe5_AZL@gitlab.as1nfra.com/asker.chan/ansible.git"
-    ansible_become_user: "{{ ansible_user }}"
-    ansible_become_pass: "{{ ansible_password }}"
+
     
 
   tasks:
@@ -74,6 +72,8 @@
       become: true
       become_method: runas
       become_flags: logon_type=new_credentials logon_flags=netcredentials_only
+      ansible_become_user: "administrator@dev.local"
+      ansible_become_pass: "P@ssw0rd"
 
         
 
