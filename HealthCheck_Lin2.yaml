@@ -3,7 +3,7 @@
   become: yes
   vars:
     output_file: "/tmp/running_services_{{ ansible_hostname }}.txt"
-    share_path: "/mnt/share"  # Replace with your actual share path
+    share_path: "\\\\172.16.17.40\\Patch\\"  # Replace with your actual share path
 
   tasks:
     - name: Get running services
