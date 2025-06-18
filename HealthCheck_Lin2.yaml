@@ -47,3 +47,8 @@
 
     - name: Copy file to mounted SMB share
       shell: cp "{{ output_file }}" "{{ smb_mount }}/running_services_{{ ansible_hostname }}.txt"
+
+    - name: Unmount SMB share
+      mount:
+        path: "{{ smb_mount }}"
+        state: unmounted
