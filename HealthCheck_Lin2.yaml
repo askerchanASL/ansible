@@ -1,0 +1,35 @@
+- name: List running services and disk usage
+  hosts: "{{ selected_host }}"
+  become: yes
+  vars:
+    output_file: "/tmp/running_services_{{ ansible_hostname }}.txt"
+    share_path: "/mnt/share"  # Replace with your actual share path
+
+  tasks:
+    - name: Get running services
+      shell: systemctl list-units --type=service --state=running
+      register: running_services
+
+    - name: Get disk space usage
+      shell: df -h
+      register: disk_usage
+
+    - name: Write output to file
+      copy:
+        content: |
+          Running Services:
+          {{ running_services.stdout }}
+
+          Disk Usage:
+          {{ disk_usage.stdout }}
+        dest: "{{ output_file }}"
+
+    - name: Ensure share path exists
+      file:
+        path: "{{ share_path }}"
+        state: directory
+
+    - name: Copy output file to share path
+      copy:
+        src: "{{ output_file }}"
+        dest: "{{ share_path }}/running_services_{{ ansible_hostname }}.txt"
