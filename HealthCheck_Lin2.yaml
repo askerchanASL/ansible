@@ -1,11 +1,32 @@
-- name: List running services and disk usage
+- name: Export results to SMB share
   hosts: "{{ selected_host }}"
   become: yes
   vars:
     output_file: "/tmp/running_services_{{ ansible_hostname }}.txt"
-    share_path: "\\\\172.16.17.40\\Patch"  # Replace with your actual share path
+    smb_share: "//172.16.17.40/Patch"
+    smb_mount: "/mnt/patch_share"
+    smb_user: "administrator@dev.local"
+    smb_pass: "P@ssw0rd"
 
   tasks:
+    - name: Install cifs-utils if not present
+      package:
+        name: cifs-utils
+        state: present
+
+    - name: Create mount point
+      file:
+        path: "{{ smb_mount }}"
+        state: directory
+
+    - name: Mount SMB share
+      mount:
+        path: "{{ smb_mount }}"
+        src: "{{ smb_share }}"
+        fstype: cifs
+        opts: "username={{ smb_user }},password={{ smb_pass }},vers=3.0"
+        state: mounted
+
     - name: Get running services
       shell: systemctl list-units --type=service --state=running
       register: running_services
@@ -24,12 +45,5 @@
           {{ disk_usage.stdout }}
         dest: "{{ output_file }}"
 
-    - name: Ensure share path exists
-      file:
-        path: "{{ share_path }}"
-        state: directory
-
-    - name: Copy output file to share path
-      copy:
-        src: "{{ output_file }}"
-        dest: "{{ share_path }}\\running_services_{{ ansible_hostname }}.txt"
+    - name: Copy file to mounted SMB share
+      shell: cp "{{ output_file }}" "{{ smb_mount }}/running_services_{{ ansible_hostname }}.txt"
