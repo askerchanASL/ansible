@@ -77,7 +77,7 @@
 
     - name: Run the installer
       ansible.builtin.command:
-        cmd: "./AutoInstall_v10.sh"
+        cmd: "./AutoInstall.sh"
         chdir: "{{ repo_dest }}"
 
     - name: Remove Folder
