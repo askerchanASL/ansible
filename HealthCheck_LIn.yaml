@@ -41,23 +41,6 @@
         path: "{{ smb_mount }}"
         state: directory
 
-    - name: Install cifs-utils if not present (shell fallback)
-      delegate_to: localhost
-      become: true
-      shell: |
-        if ! command -v mount.cifs &> /dev/null; then
-          if command -v dnf &> /dev/null; then
-            dnf install -y cifs-utils
-          elif command -v yum &> /dev/null; then
-            yum install -y cifs-utils
-          elif command -v apt &> /dev/null; then
-            apt update && apt install -y cifs-utils
-          else
-            echo "No supported package manager found."
-            exit 1
-          fi
-        fi
-
     - name: Mount SMB share using CIFS
       delegate_to: localhost
       become: true
