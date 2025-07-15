@@ -32,17 +32,35 @@
       become: true
       shell: |
         if ! command -v smbclient &> /dev/null; then
+          echo "Installing smbclient..."
           if command -v dnf &> /dev/null; then
-            dnf install -y smbclient
+            dnf install -y samba-client
           elif command -v yum &> /dev/null; then
-            yum install -y smbclient
+            yum install -y samba-client
           elif command -v apt &> /dev/null; then
             apt update && apt install -y smbclient
+          else
+            echo "No supported package manager found."
+            exit 1
           fi
+        else
+          echo "smbclient already installed."
         fi
+      register: smbclient_install
+      ignore_errors: false
+    - name: Debug smbclient installation output
+      delegate_to: localhost
+      debug:
+        var: smbclient_install.stdout_lines
 
     - name: Upload file to SMB share using smbclient
       delegate_to: localhost
       become: false
       shell: >
         smbclient //172.16.17.40/Patch -U "administrator@dev.local%P@ssw0rd" -c "put /tmp/running_services_{{ inventory_hostname }}.txt"
+      register: smbclient_upload
+
+    - name: Debug upload result
+      delegate_to: localhost
+      debug:
+        var: smbclient_upload.stdout_lines
