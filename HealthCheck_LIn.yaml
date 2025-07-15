@@ -1,23 +1,59 @@
----
-- name: List running services and disk usage
+- name: Gather system info and export to SMB share
   hosts: "{{ selected_host }}"
   become: yes
-  vars:
-    output_file: "running_services_{{ ansible_hostname }}.txt"
+  gather_facts: false
 
   tasks:
     - name: Get running services
       shell: systemctl list-units --type=service --state=running
       register: running_services
 
-    - name: Show running services in stdout
-      debug:
-        msg: "{{ running_services.stdout_lines }}"
-
     - name: Get disk space usage
       shell: df -h
       register: disk_usage
 
-    - name: Show disk space usage in stdout
-      debug:
-        msg: "{{ disk_usage.stdout_lines }}"
+    - name: Set facts to return to controller
+      set_fact:
+        combined_output: |
+          Running Services:
+          {{ running_services.stdout }}
+
+          Disk Usage:
+          {{ disk_usage.stdout }}
+
+    - name: Save output to local file on control node
+      delegate_to: localhost
+      copy:
+        content: "{{ combined_output }}"
+        dest: "/tmp/running_services_{{ inventory_hostname }}.txt"
+
+    - name: Ensure mount point exists
+      delegate_to: localhost
+      become: true
+      file:
+        path: "/mnt/patch_share"
+        state: directory
+    - name: Mount SMB share
+      delegate_to: localhost
+      become: true
+      mount:
+        path: "/mnt/patch_share"
+        src: "//172.16.17.40/Patch"
+        fstype: cifs
+        opts: "username=administrator@dev.local,password=P@ssw0rd,vers=3.0"
+        state: mounted
+
+    - name: Copy file to SMB share
+      delegate_to: localhost
+      become: true
+      copy:
+        src: "/tmp/running_services_{{ inventory_hostname }}.txt"
+        dest: "/mnt/patch_share/running_services_{{ inventory_hostname }}.txt"
+        remote_src: no
+
+    - name: Unmount SMB share
+      delegate_to: localhost
+      become: true
+      mount:
+        path: "/mnt/patch_share"
+        state: unmounted
