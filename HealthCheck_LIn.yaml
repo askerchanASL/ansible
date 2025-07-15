@@ -1,7 +1,14 @@
-- name: Gather system info and export to SMB share using smbclient
+- name: Gather system info and export to SMB share using CIFS
   hosts: "{{ selected_host }}"
   become: yes
   gather_facts: false
+
+  vars:
+    output_file: "/tmp/running_services_{{ inventory_hostname }}.txt"
+    smb_share: "//172.16.17.40/Patch"
+    smb_mount: "/mnt/patch_share"
+    smb_user: "administrator@dev.local"
+    smb_pass: "P@ssw0rd"
 
   tasks:
     - name: Get running services
@@ -25,42 +32,53 @@
       delegate_to: localhost
       copy:
         content: "{{ combined_output }}"
-        dest: "/tmp/running_services_{{ inventory_hostname }}.txt"
+        dest: "{{ output_file }}"
 
-    - name: Ensure smbclient is installed using shell
+    - name: Ensure mount point exists
+      delegate_to: localhost
+      become: true
+      file:
+        path: "{{ smb_mount }}"
+        state: directory
+
+    - name: Install cifs-utils if not present (shell fallback)
       delegate_to: localhost
       become: true
       shell: |
-        if ! command -v smbclient &> /dev/null; then
-          echo "Installing smbclient..."
+        if ! command -v mount.cifs &> /dev/null; then
           if command -v dnf &> /dev/null; then
-            dnf install -y samba-client
+            dnf install -y cifs-utils
           elif command -v yum &> /dev/null; then
-            yum install -y samba-client
+            yum install -y cifs-utils
           elif command -v apt &> /dev/null; then
-            apt update && apt install -y smbclient
+            apt update && apt install -y cifs-utils
           else
             echo "No supported package manager found."
             exit 1
           fi
-        else
-          echo "smbclient already installed."
         fi
-      register: smbclient_install
-      ignore_errors: false
-    - name: Debug smbclient installation output
-      delegate_to: localhost
-      debug:
-        var: smbclient_install.stdout_lines
 
-    - name: Upload file to SMB share using smbclient
+    - name: Mount SMB share using CIFS
       delegate_to: localhost
-      become: false
-      shell: >
-        smbclient //172.16.17.40/Patch -U "administrator@dev.local%P@ssw0rd" -c "put /tmp/running_services_{{ inventory_hostname }}.txt"
-      register: smbclient_upload
+      become: true
+      mount:
+        path: "{{ smb_mount }}"
+        src: "{{ smb_share }}"
+        fstype: cifs
+        opts: "username={{ smb_user }},password={{ smb_pass }},vers=3.0"
+        state: mounted
 
-    - name: Debug upload result
+    - name: Copy file to mounted SMB share
       delegate_to: localhost
-      debug:
-        var: smbclient_upload.stdout_lines
+      become: true
+      copy:
+        src: "{{ output_file }}"
+        dest: "{{ smb_mount }}/running_services_{{ inventory_hostname }}.txt"
+        remote_src: no
+
+    - name: Unmount SMB share
+      delegate_to: localhost
+      become: true
+      mount:
+        path: "{{ smb_mount }}"
+        state: unmounted
