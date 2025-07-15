@@ -1,4 +1,4 @@
-- name: Gather system info and export to SMB share
+- name: Gather system info and export to SMB share using smbclient
   hosts: "{{ selected_host }}"
   become: yes
   gather_facts: false
@@ -12,7 +12,7 @@
       shell: df -h
       register: disk_usage
 
-    - name: Set facts to return to controller
+    - name: Combine output
       set_fact:
         combined_output: |
           Running Services:
@@ -27,33 +27,15 @@
         content: "{{ combined_output }}"
         dest: "/tmp/running_services_{{ inventory_hostname }}.txt"
 
-    - name: Ensure mount point exists
+    - name: Install smbclient on control node
       delegate_to: localhost
       become: true
-      file:
-        path: "/mnt/patch_share"
-        state: directory
-    - name: Mount SMB share
-      delegate_to: localhost
-      become: true
-      mount:
-        path: "/mnt/patch_share"
-        src: "//172.16.17.40/Patch"
-        fstype: cifs
-        opts: "username=administrator@dev.local,password=P@ssw0rd,vers=3.0"
-        state: mounted
+      package:
+        name: smbclient
+        state: present
 
-    - name: Copy file to SMB share
+    - name: Upload file to SMB share using smbclient
       delegate_to: localhost
-      become: true
-      copy:
-        src: "/tmp/running_services_{{ inventory_hostname }}.txt"
-        dest: "/mnt/patch_share/running_services_{{ inventory_hostname }}.txt"
-        remote_src: no
-
-    - name: Unmount SMB share
-      delegate_to: localhost
-      become: true
-      mount:
-        path: "/mnt/patch_share"
-        state: unmounted
+      become: false
+      shell: >
+        smbclient //172.16.17.40/Patch -U "administrator@dev.local%P@ssw0rd" -c "put /tmp/running_services_{{ inventory_hostname }}.txt"
