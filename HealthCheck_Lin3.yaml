@@ -16,5 +16,5 @@
       register: disk_usage
 
     - name: Get YUM history
-      shell: yum history info
-      register: yum_history_info
+      shell: yum list installed
+      register: yum_list_installed
