@@ -22,3 +22,7 @@
     - name: Get Dnf history
       shell: dnf history
       register: dnf_history
+
+    - name: Get Dnf history full detail
+      debug:
+        var: dnf_history.stdout_lines
