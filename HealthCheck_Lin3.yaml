@@ -1,6 +1,6 @@
 
 - name: Gather system info and export to SMB share using CIFS
-  hosts: "{{ selected_host }}"
+  hosts: "{{ selected_group }}"
   become: yes
   gather_facts: false
 
