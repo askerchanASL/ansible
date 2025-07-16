@@ -3,9 +3,9 @@
   hosts: localhost
   become: yes
   vars:
-    unc_path: "//server/share"         # UNC path to the shared folder
+    unc_path: "//172.16.17.40/Patch/RPM"         # UNC path to the shared folder
     mount_point: "/mnt/rpmshare"       # Local mount point
-    rpm_file: "package.rpm"            # RPM file name
+    #rpm_file: "*.rpm"            # RPM file name
     username: "dev\administrator"               # Username for UNC share
     password: "P@ssw0rd"               # Password for UNC share
     
@@ -24,23 +24,41 @@
         opts: "username={{ username }},password={{ password }},vers=3.0"
         state: mounted
 
-    - name: Copy RPM file to target host
+    - name: Find all RPM files in mounted UNC path
+      find:
+        paths: "{{ mount_point }}"
+        patterns: "*.rpm"
+      register: rpm_files
+
+
+    - name: Copy RPM files to target host
       copy:
-        src: "{{ mount_point }}/{{ rpm_file }}"
-        dest: "/tmp/{{ rpm_file }}"
+        src: "{{ item.path }}"
+        dest: "/tmp/{{ item.path | basename }}"
         remote_src: no
+      loop: "{{ rpm_files.files }}"
       delegate_to: "{{ selected_group }}"
+
 
     - name: Unmount UNC share
       mount:
         path: "{{ mount_point }}"
         state: unmounted
 
-- name: Install RPM on target host
+
+- name: Install all RPMs on target host
   hosts: "{{ selected_group }}"
   become: yes
   tasks:
-    - name: Install RPM package
+    - name: Find all RPMs in /tmp
+      find:
+        paths: "/tmp"
+        patterns: "*.rpm"
+      register: copied_rpms
+
+    - name: Install RPM packages
       yum:
-        name: "/tmp/{{ rpm_file }}"
+        name: "{{ item.path }}"
         state: present
+      loop: "{{ copied_rpms.files }}"
+
