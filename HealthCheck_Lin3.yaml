@@ -23,6 +23,6 @@
       shell: COLUMNS=800 LINES=80 dnf history list
       register: dnf_history
 
-    - name: Get Dnf history full detail
-      debug:
-        var: dnf_history.stdout_lines
+    - name: Get rpm history
+      shell: rpm -qa --last 
+      register: rpm_last
