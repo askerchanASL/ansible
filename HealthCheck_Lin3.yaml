@@ -18,3 +18,7 @@
     - name: Get YUM history
       shell: yum list installed
       register: yum_list_installed
+      
+    - name: Get Dnf history
+      shell: dnf history
+      register: dnf_history
