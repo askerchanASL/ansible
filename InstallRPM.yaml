@@ -1,0 +1,46 @@
+---
+- name: Mount UNC path and copy RPM to target host
+  hosts: localhost
+  become: yes
+  vars:
+    unc_path: "//server/share"         # UNC path to the shared folder
+    mount_point: "/mnt/rpmshare"       # Local mount point
+    rpm_file: "package.rpm"            # RPM file name
+    username: "dev\administrator"               # Username for UNC share
+    password: "P@ssw0rd"               # Password for UNC share
+    
+
+  tasks:
+    - name: Ensure mount directory exists
+      file:
+        path: "{{ mount_point }}"
+        state: directory
+
+    - name: Mount UNC share
+      mount:
+        path: "{{ mount_point }}"
+        src: "{{ unc_path }}"
+        fstype: cifs
+        opts: "username={{ username }},password={{ password }},vers=3.0"
+        state: mounted
+
+    - name: Copy RPM file to target host
+      copy:
+        src: "{{ mount_point }}/{{ rpm_file }}"
+        dest: "/tmp/{{ rpm_file }}"
+        remote_src: no
+      delegate_to: "{{ selected_group }}"
+
+    - name: Unmount UNC share
+      mount:
+        path: "{{ mount_point }}"
+        state: unmounted
+
+- name: Install RPM on target host
+  hosts: "{{ selected_group }}"
+  become: yes
+  tasks:
+    - name: Install RPM package
+      yum:
+        name: "/tmp/{{ rpm_file }}"
+        state: present
