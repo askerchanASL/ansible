@@ -20,7 +20,7 @@
       register: yum_list_installed
       
     - name: Get Dnf history
-      shell: COLUMNS=200 LINES=50 dnf history list
+      shell: COLUMNS=800 LINES=80 dnf history list
       register: dnf_history
 
     - name: Get Dnf history full detail
