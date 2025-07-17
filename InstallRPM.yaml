@@ -57,8 +57,10 @@
       register: copied_rpms
 
     - name: Install RPM packages
-      yum:
-        name: "{{ item.path }}"
-        state: present
+      command: rpm -ivh "{{ item.path }}"
+        #name: "{{ item.path }}"
+        #state: present
       loop: "{{ copied_rpms.files }}"
+      args:
+          warn: false
 
