@@ -1,0 +1,108 @@
+---
+- name: Install UEMS Linux Agent
+  hosts: "{{ selected_group }}"
+  become: yes
+  vars:
+    min_cpu_threads: 2
+    min_ram_gb: 3.5
+    min_space_gb: 2
+    install_dir: /tmp/ME
+    service_file: /etc/systemd/system/dcservice.service
+    site_mapping:
+      LocalOffice: LocalOffice_UEMSLinuxAgent.zip
+      TestOffice: TestOffice_UEMSLinuxAgent.zip
+
+  tasks:
+
+    - name: Gather system facts
+      ansible.builtin.setup:
+
+    - name: Check CPU threads
+      ansible.builtin.fail:
+        msg: "Not enough CPU threads. Required: {{ min_cpu_threads }}, Available: {{ ansible_processor_cores }}"
+      when: ansible_processor_cores < min_cpu_threads
+
+    - name: Check total memory
+      ansible.builtin.fail:
+        msg: "Not enough memory. Required: {{ min_ram_gb }} GB, Available: {{ (ansible_memtotal_mb / 1024) | round(2) }} GB"
+      when: (ansible_memtotal_mb / 1024) < min_ram_gb
+
+    - name: Check free disk space
+      ansible.builtin.command: df --output=avail -BG /
+      register: disk_output
+      changed_when: false
+
+    - name: Parse disk space
+      set_fact:
+        free_space_gb: "{{ disk_output.stdout_lines[1] | regex_replace('[^0-9]', '') | int }}"
+
+    - name: Fail if not enough disk space
+      ansible.builtin.fail:
+        msg: "Not enough disk space. Required: {{ min_space_gb }} GB, Available: {{ free_space_gb }} GB"
+      when: free_space_gb < min_space_gb
+
+    - name: Read site_map.csv
+      ansible.builtin.slurp:
+        src: site_map.csv
+      register: csv_data
+
+    - name: Parse site code from CSV
+      set_fact:
+        site_code: "{{ csv_data['content'] | b64decode | regex_search(hostvars[inventory_hostname]['ansible_hostname'] ~ ',[^,]*,([^,\n]*)', '\\1') }}"
+
+    - name: Fail if site code not found
+      ansible.builtin.fail:
+        msg: "No matching computer name or IP address found in site_map.csv."
+      when: site_code is undefined or site_code == ""
+
+    - name: Set site package path
+      set_fact:
+        site_path: "{{ site_mapping[site_code] | default('') }}"
+
+    - name: Fail if site package not mapped
+      ansible.builtin.fail:
+        msg: "No installation package mapped for site code '{{ site_code }}'."
+      when: site_path == ""
+
+    - name: Unzip installation package
+      ansible.builtin.unarchive:
+        src: "{{ site_path }}"
+        dest: "{{ install_dir }}"
+        remote_src: yes
+
+    - name: Run installer
+      ansible.builtin.command: "{{ install_dir }}/UEMS_LinuxAgent.bin -f"
+      args:
+        chdir: "{{ install_dir }}"
+
+    - name: Reload systemd
+      ansible.builtin.systemd:
+        daemon_reload: yes
+
+    - name: Restart dcservice
+      ansible.builtin.systemd:
+        name: dcservice.service
+        state: restarted
+        enabled: yes
+
+    - name: Ensure service file exists
+      ansible.builtin.stat:
+        path: "{{ service_file }}"
+      register: service_stat
+
+    - name: Fail if service file missing
+      ansible.builtin.fail:
+        msg: "Service file not found: {{ service_file }}"
+      when: not service_stat.stat.exists
+
+    - name: Set CPUQuota in service file
+      ansible.builtin.lineinfile:
+        path: "{{ service_file }}"
+        regexp: '^CPUQuota='
+        line: 'CPUQuota=50%'
+        insertafter: '^\[Service\]'
+        create: yes
+
+    - name: Reload systemd again
+      ansible.builtin.systemd:
+        daemon_reload: yes
