@@ -53,7 +53,7 @@
     - name: Assert disk space
       assert:
         that: free_space_gb >= min_space_gb
-        fail_msg: "Not enough disk space."
+        fail_msg: "Not enough disk space. Required: {{ min_space_gb }} GB, Available: {{ free_space_gb }} GB"
 
     - name: Get hostname and IP
       set_fact:
