@@ -21,7 +21,7 @@
       register: cpu_threads
 
     - name: Check memory
-      win_shell: "(Get-WmiObject -Class Win32_ComputerSystem).TotalPhysicalMemory / 1GB"
+      win_shell: "[math]::Round((Get-WmiObject -Class Win32_ComputerSystem).TotalPhysicalMemory / 1GB, 0)"
       register: total_memory
 
     - name: Check disk space
