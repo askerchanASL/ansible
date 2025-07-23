@@ -19,8 +19,8 @@
       ITIS: "6"
       PSM: "0"
     registry_paths:
-      patch: 'HKLM:/SOFTWARE/WOW6432Node/AdventNet/DesktopCentral/DCAgent/Patch'
-      agent: 'HKLM/SOFTWARE/WOW6432Node/AdventNet/DesktopCentral/DCAgent'
+      patch: 'HKLM:\\SOFTWARE\\WOW6432Node\\AdventNet\\DesktopCentral\\DCAgent\\Patch'
+      agent: 'HKLM:\\SOFTWARE\\WOW6432Node\\AdventNet\\DesktopCentral\\DCAgent'
 
   tasks:
 
