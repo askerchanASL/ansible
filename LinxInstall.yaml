@@ -27,9 +27,14 @@
   tasks:
 
     - name: Check CPU threads
+      command: nproc
+      register: cpu_threads_result
+      changed_when: false
+
+    - name: Assert CPU threads
       assert:
-        that: ansible_processor_cores >= min_cpu_threads
-        fail_msg: "Not enough CPU threads."
+        that: cpu_threads_result.stdout | int >= min_cpu_threads
+        fail_msg: "Not enough CPU threads. Required: {{ min_cpu_threads }}, Available: {{ cpu_threads_result.stdout }}"
 
     - name: Check RAM
       assert:
