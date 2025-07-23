@@ -2,6 +2,10 @@
 - name: Install UEMS Linux Agent
   hosts: "{{ selected_group }}"
   become: yes
+
+  cpllections:
+    - community.general
+    
   vars:
     min_cpu_threads: 2
     min_ram_gb: 3.5
@@ -10,18 +14,18 @@
     csv_file: /tmp/site_map.csv
     service_file: /etc/systemd/system/dcservice.service
     site_mapping:
-      IFCOAUAT: IFCOAUAT_UEMSLinuxAgent.zip
-      IFCDMZUAT: IFCDMZUAT_UEMSLinuxAgent.zip
-      KCCOAUAT: KCCOAUAT_UEMSLinuxAgent.zip
-      KCCDMZUAT: KCCDMZUAT_UEMSLinuxAgent.zip
-      IFCOAPRD: IFCOAPRD_UEMSLinuxAgent.zip
-      IFCDMZPRD: IFCDMZPRD_UEMSLinuxAgent.zip
-      KCCOAPRD: KCCOAPRD_UEMSLinuxAgent.zip
-      KCCDMZPRD: KCCDMZPRD_UEMSLinuxAgent.zip
-      LZInternalUAT: LZInternalUAT_UEMSLinuxAgent.zip
-      LZDMZUAT: LZDMZUAT_UEMSLinuxAgent.zip
-      LZInternalPRD: LZInternalPRD_UEMSLinuxAgent.zip
-      LZDMZPRD: LZDMZPRD_UEMSLinuxAgent.zip
+      IFCOAUAT: /tmp/IFCOAUAT_UEMSLinuxAgent.zip
+      IFCDMZUAT: /tmp/IFCDMZUAT_UEMSLinuxAgent.zip
+      KCCOAUAT: /tmp/KCCOAUAT_UEMSLinuxAgent.zip
+      KCCDMZUAT: /tmp/KCCDMZUAT_UEMSLinuxAgent.zip
+      IFCOAPRD: /tmp/IFCOAPRD_UEMSLinuxAgent.zip
+      IFCDMZPRD: /tmp/IFCDMZPRD_UEMSLinuxAgent.zip
+      KCCOAPRD: /tmp/KCCOAPRD_UEMSLinuxAgent.zip
+      KCCDMZPRD: /tmp/KCCDMZPRD_UEMSLinuxAgent.zip
+      LZInternalUAT: /tmp/LZInternalUAT_UEMSLinuxAgent.zip
+      LZDMZUAT: /tmp/LZDMZUAT_UEMSLinuxAgent.zip
+      LZInternalPRD: /tmp/LZInternalPRD_UEMSLinuxAgent.zip
+      LZDMZPRD: /tmp/LZDMZPRD_UEMSLinuxAgent.zip
   tasks:
     - name: Check CPU threads
       command: nproc
@@ -32,31 +36,38 @@
         that: cpu_threads_result.stdout | int >= min_cpu_threads
         fail_msg: "Not enough CPU threads. Required: {{ min_cpu_threads }}, Available:
           {{ cpu_threads_result.stdout }}"
+          
     - name: Check RAM
       assert:
         that: (ansible_memtotal_mb / 1024) >= min_ram_gb
         fail_msg: Not enough memory.
+        
     - name: Check disk space
       command: df --output=avail -BG /
       register: disk_output
       changed_when: false
+      
     - name: Parse disk space
       set_fact:
         free_space_gb: "{{ disk_output.stdout_lines[1] | regex_replace('[^0-9]', '') | int }}"
+        
     - name: Assert disk space
       assert:
         that:
           - free_space_gb | int >= min_space_gb | int
         fail_msg: "Not enough disk space. Required: {{ min_space_gb }} GB, Available: {{
           free_space_gb }} GB"
+          
     - name: Get hostname and IP
       set_fact:
         hostname: "{{ ansible_hostname }}"
         ip_address: "{{ ansible_default_ipv4.address }}"
+        
     - name: Read site code from CSV
       community.general.read_csv:
         path: " {{ csv_file }} "
         register: site_map
+        
     - name: Find site code by hostname
       set_fact:
         site_code: "{{
@@ -74,48 +85,59 @@
             site_map.list | selectattr('IPAddress', 'equalto', ip_address) | map(attribute='SiteCode') | first
             }}
       when: site_code is not defined or site_code == ""
+      
     - name: Set site code
       set_fact:
         site_code: "{{ site_code_result.stdout | trim }}"
+        
     - name: Get site zip file
       set_fact:
         site_path: "{{ site_mapping[site_code] | default('') }}"
+        
     - name: Fail if site zip not found
       fail:
         msg: No installation package mapped for site code '{{ site_code }}'.
       when: site_path == ""
+      
     - name: Unzip package
       unarchive:
         src: "{{ site_path }}"
         dest: "{{ install_dir }}"
         remote_src: yes
+        
     - name: Run installer
       command: "{{ install_dir }}/UEMS_LinuxAgent.bin -f"
       args:
         chdir: "{{ install_dir }}"
+        
     - name: Modify systemd service
       block:
         - name: Ensure service file exists
           stat:
             path: "{{ service_file }}"
           register: service_stat
+          
         - name: Fail if service file missing
           fail:
             msg: "Service file not found: {{ service_file }}"
           when: not service_stat.stat.exists
+          
         - name: Update or insert CPUQuota
           lineinfile:
             path: "{{ service_file }}"
             regexp: ^CPUQuota=
             line: CPUQuota=50%
             insertafter: ^\[Service\]
+            
         - name: Reload systemd
           systemd:
             daemon_reload: yes
+            
         - name: Restart service
           systemd:
             name: dcservice.service
             state: restarted
+            
     - name: Cleanup installation directory
       file:
         path: "{{ install_dir }}"
