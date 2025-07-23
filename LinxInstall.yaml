@@ -3,7 +3,7 @@
   hosts: "{{ selected_group }}"
   become: yes
 
-  cpllections:
+  collections:
     - community.general
     
   vars:
