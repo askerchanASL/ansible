@@ -98,6 +98,13 @@
         src: "{{ site_path }}"
         dest: "{{ install_dir }}"
         remote_src: yes
+
+    - name: Make installer executable
+      file:
+        path: "{{ install_dir }}/UEMS_LinuxAgent.bin"
+        mode: '0755'
+        state: file
+      become: yes
         
     - name: Run installer
       command: "{{ install_dir }}/UEMS_LinuxAgent.bin -f"
