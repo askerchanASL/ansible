@@ -103,6 +103,7 @@
       command: "{{ install_dir }}/UEMS_LinuxAgent.bin -f"
       args:
         chdir: "{{ install_dir }}"
+      become: yes
         
     - name: Modify systemd service
       block:
