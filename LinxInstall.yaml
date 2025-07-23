@@ -52,7 +52,8 @@
 
     - name: Assert disk space
       assert:
-        that: free_space_gb >= min_space_gb
+        that: 
+           - free_space_gb >= min_space_gb | int
         fail_msg: "Not enough disk space. Required: {{ min_space_gb }} GB, Available: {{ free_space_gb }} GB"
 
     - name: Get hostname and IP
