@@ -62,12 +62,24 @@
         ip_address: "{{ ansible_default_ipv4.address }}"
 
     - name: Read site code from CSV
-      command: >
-        awk -F, -v host="{{ hostname }}" '$1 == host {print $3}' {{ csv_file }}
-      register: site_code_result
-      changed_when: false
-      failed_when: site_code_result.stdout == ""
-
+      community.general.read_csv:
+        path: " {{ csv_file }} "
+          register: site_map
+    - name: Find site code by hostname
+      set_fact:
+        site_code: >-
+          {{
+            site_map.list | selectattr('ComputerName', 'equalto', hostname) | map(attribute='SiteCode') | first
+            }}
+                
+    - name: Fallback to IP if site code not found
+      set_fact: 
+        site_code: >-
+          {{
+            site_map.list | selectattr('IPAddress', 'equalto', ip_address) | map(attribute='SiteCode') | first
+            }}
+      when: site_code is not defined or site_code == ""
+      
     - name: Set site code
       set_fact:
         site_code: "{{ site_code_result.stdout | trim }}"
