@@ -10,7 +10,7 @@
     installers:
       LocalOffice: "LocalOffice_Agent.exe"
       TestOffice: "TestOffice_Agent.exe"
-    Team_day_map:
+    team_day_map:
       ITAS1: "1"
       ITAS2: "2"
       ITDP: "3"
@@ -50,7 +50,7 @@
         $ips = Get-NetIPAddress -AddressFamily IPv4 | Select-Object -ExpandProperty IPAddress
         $match = $csv | Where-Object { $_.ComputerName -eq $hostname -or $ips -contains $_.IPAddress }
         if ($match) {
-          Write-Output "$($match.SiteCode),$($match.Team)"
+          Write-Output "$($match.SiteCode),$($match.TeamName)"
         }
       register: site_info
 
@@ -78,7 +78,7 @@
           win_regedit:
             path: "{{ registry_paths.patch }}"
             name: DBSyncScanDays
-            data: "{{ lookup('vars', 'team_day_map')[team] }}"
+            data: "{{ team_day_map[team] }}"
             type: string
 
         - name: Set DBSyncScanTime
