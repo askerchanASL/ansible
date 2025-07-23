@@ -2,7 +2,6 @@
 - name: Install Patch Manager Agent on Windows
   hosts: " {{ selected_group }} "
   gather_facts: yes
-  become: yes
   vars:
     min_cpu_threads: 2
     min_memory_gb: 4
