@@ -1,7 +1,7 @@
 
 ---
 - name: Install UEMS Linux Agent
-  hosts: "{{ selected group }}"
+  hosts: "{{ selected_group }}"
   become: yes
   vars:
     min_cpu_threads: 2
