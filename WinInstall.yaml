@@ -72,13 +72,17 @@
       register: install_result
       ignore_errors: yes
 
+    - name: Clean up team name
+      set_fact:
+        team_clean: "{{ team | trim }}"
+
     - name: Set registry values if install succeeded
       block:
         - name: Set DBSyncScanDays
           win_regedit:
             path: "{{ registry_paths.patch }}"
             name: DBSyncScanDays
-            data: "{{ team_day_map[team] }}"
+            data: "{{ team_day_map[team_clean] }}"
             type: string
 
         - name: Set DBSyncScanTime
