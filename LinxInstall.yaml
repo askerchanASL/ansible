@@ -1,34 +1,43 @@
+
 ---
 - name: Install UEMS Linux Agent
-  hosts: "{{ selected_group }}"
+  hosts: "{{ selected groyp }}"
   become: yes
   vars:
     min_cpu_threads: 2
     min_ram_gb: 3.5
-    min_space_gb: 2
+    min_space_gb: 5
     install_dir: /tmp/ME
+    csv_file: site_map.csv
     service_file: /etc/systemd/system/dcservice.service
     site_mapping:
-      LocalOffice: LocalOffice_UEMSLinuxAgent.zip
-      TestOffice: TestOffice_UEMSLinuxAgent.zip
+      IFCOAUAT: IFCOAUAT_UEMSLinuxAgent.zip
+      IFCDMZUAT: IFCDMZUAT_UEMSLinuxAgent.zip
+      KCCOAUAT: KCCOAUAT_UEMSLinuxAgent.zip
+      KCCDMZUAT: KCCDMZUAT_UEMSLinuxAgent.zip
+      IFCOAPRD: IFCOAPRD_UEMSLinuxAgent.zip
+      IFCDMZPRD: IFCDMZPRD_UEMSLinuxAgent.zip
+      KCCOAPRD: KCCOAPRD_UEMSLinuxAgent.zip
+      KCCDMZPRD: KCCDMZPRD_UEMSLinuxAgent.zip
+      LZInternalUAT: LZInternalUAT_UEMSLinuxAgent.zip
+      LZDMZUAT: LZDMZUAT_UEMSLinuxAgent.zip
+      LZInternalPRD: LZInternalPRD_UEMSLinuxAgent.zip
+      LZDMZPRD: LZDMZPRD_UEMSLinuxAgent.zip
 
   tasks:
 
-    - name: Gather system facts
-      ansible.builtin.setup:
-
     - name: Check CPU threads
-      ansible.builtin.fail:
-        msg: "Not enough CPU threads. Required: {{ min_cpu_threads }}, Available: {{ ansible_processor_cores }}"
-      when: ansible_processor_cores < min_cpu_threads
+      assert:
+        that: ansible_processor_cores >= min_cpu_threads
+        fail_msg: "Not enough CPU threads."
 
-    - name: Check total memory
-      ansible.builtin.fail:
-        msg: "Not enough memory. Required: {{ min_ram_gb }} GB, Available: {{ (ansible_memtotal_mb / 1024) | round(2) }} GB"
-      when: (ansible_memtotal_mb / 1024) < min_ram_gb
+    - name: Check RAM
+      assert:
+        that: (ansible_memtotal_mb / 1024) >= min_ram_gb
+        fail_msg: "Not enough memory."
 
-    - name: Check free disk space
-      ansible.builtin.command: df --output=avail -BG /
+    - name: Check disk space
+      command: df --output=avail -BG /
       register: disk_output
       changed_when: false
 
@@ -36,73 +45,75 @@
       set_fact:
         free_space_gb: "{{ disk_output.stdout_lines[1] | regex_replace('[^0-9]', '') | int }}"
 
-    - name: Fail if not enough disk space
-      ansible.builtin.fail:
-        msg: "Not enough disk space. Required: {{ min_space_gb }} GB, Available: {{ free_space_gb }} GB"
-      when: free_space_gb < min_space_gb
+    - name: Assert disk space
+      assert:
+        that: free_space_gb >= min_space_gb
+        fail_msg: "Not enough disk space."
 
-    - name: Read site_map.csv
-      ansible.builtin.slurp:
-        src: site_map.csv
-      register: csv_data
-
-    - name: Parse site code from CSV
+    - name: Get hostname and IP
       set_fact:
-        site_code: "{{ csv_data['content'] | b64decode | regex_search(hostvars[inventory_hostname]['ansible_hostname'] ~ ',[^,]*,([^,\n]*)', '\\1') }}"
+        hostname: "{{ ansible_hostname }}"
+        ip_address: "{{ ansible_default_ipv4.address }}"
 
-    - name: Fail if site code not found
-      ansible.builtin.fail:
-        msg: "No matching computer name or IP address found in site_map.csv."
-      when: site_code is undefined or site_code == ""
+    - name: Read site code from CSV
+      command: >
+        awk -F, -v host="{{ hostname }}" '$1 == host {print $3}' {{ csv_file }}
+      register: site_code_result
+      changed_when: false
+      failed_when: site_code_result.stdout == ""
 
-    - name: Set site package path
+    - name: Set site code
+      set_fact:
+        site_code: "{{ site_code_result.stdout | trim }}"
+
+    - name: Get site zip file
       set_fact:
         site_path: "{{ site_mapping[site_code] | default('') }}"
 
-    - name: Fail if site package not mapped
-      ansible.builtin.fail:
+    - name: Fail if site zip not found
+      fail:
         msg: "No installation package mapped for site code '{{ site_code }}'."
       when: site_path == ""
 
-    - name: Unzip installation package
-      ansible.builtin.unarchive:
+    - name: Unzip package
+      unarchive:
         src: "{{ site_path }}"
         dest: "{{ install_dir }}"
         remote_src: yes
 
     - name: Run installer
-      ansible.builtin.command: "{{ install_dir }}/UEMS_LinuxAgent.bin -f"
+      command: "{{ install_dir }}/UEMS_LinuxAgent.bin -f"
       args:
         chdir: "{{ install_dir }}"
 
-    - name: Reload systemd
-      ansible.builtin.systemd:
-        daemon_reload: yes
+    - name: Modify systemd service
+      block:
+        - name: Ensure service file exists
+          stat:
+            path: "{{ service_file }}"
+          register: service_stat
 
-    - name: Restart dcservice
-      ansible.builtin.systemd:
-        name: dcservice.service
-        state: restarted
-        enabled: yes
+        - name: Fail if service file missing
+          fail:
+            msg: "Service file not found: {{ service_file }}"
+          when: not service_stat.stat.exists
 
-    - name: Ensure service file exists
-      ansible.builtin.stat:
-        path: "{{ service_file }}"
-      register: service_stat
+        - name: Update or insert CPUQuota
+          lineinfile:
+            path: "{{ service_file }}"
+            regexp: '^CPUQuota='
+            line: 'CPUQuota=50%'
+            insertafter: '^\[Service\]'
 
-    - name: Fail if service file missing
-      ansible.builtin.fail:
-        msg: "Service file not found: {{ service_file }}"
-      when: not service_stat.stat.exists
+        - name: Reload systemd
+          systemd:
+            daemon_reload: yes
+        - name: Restart service
+          systemd:
+            name: dcservice.service
+            state: restarted
 
-    - name: Set CPUQuota in service file
-      ansible.builtin.lineinfile:
-        path: "{{ service_file }}"
-        regexp: '^CPUQuota='
-        line: 'CPUQuota=50%'
-        insertafter: '^\[Service\]'
-        create: yes
-
-    - name: Reload systemd again
-      ansible.builtin.systemd:
-        daemon_reload: yes
+    - name: Cleanup installation directory
+      file:
+        path: "{{ install_dir }}"
+        state: absent
