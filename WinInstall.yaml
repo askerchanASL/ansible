@@ -10,6 +10,14 @@
     installers:
       LocalOffice: "LocalOffice_Agent.exe"
       TestOffice: "TestOffice_Agent.exe"
+    Team_day_map:
+      ITAS1: "1"
+      ITAS2: "2"
+      ITDP: "3"
+      ITDP-CSP: "4"
+      HKFMI: "5"
+      ITIS: "6"
+      PSM: "0"
     registry_paths:
       patch: "HKLM\\SOFTWARE\\WOW6432Node\\AdventNet\\DesktopCentral\\DCAgent\\Patch"
       agent: "HKLM\\SOFTWARE\\WOW6432Node\\AdventNet\\DesktopCentral\\DCAgent"
