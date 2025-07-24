@@ -1,6 +1,6 @@
 ---
 - name: Test ports on Windows host 172.16.17.60
-  hosts: windows
+  hosts: "{{ selected_group }}"
   gather_facts: no
   tasks:
     - name: Check if port 8383 is open
