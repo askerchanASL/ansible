@@ -147,7 +147,7 @@
         - name: Copy all installation files to Windows
           win_copy:
             src: "{{ local_repo_path }}/WindowsAgent"
-            dest: C:\TEMP\UEMSAgent
+            dest: C:\\TEMP\\UEMSAgent
             recurse: yes
 
         - name: Check CPU threads
@@ -194,7 +194,7 @@
         - name: Run installer
           win_command: "{{ installers[site] }} /silent"
           args:
-            chdir: "C:\TEMP\AN"
+            chdir: "{{ install_dir_win }}"
           register: install_result
           ignore_errors: yes
 
