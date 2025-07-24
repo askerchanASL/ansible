@@ -1,0 +1,28 @@
+---
+- name: Test ports on Windows host 172.16.17.60
+  hosts: windows
+  gather_facts: no
+  tasks:
+    - name: Check if port 8383 is open
+      win_wait_for:
+        host: 172.16.17.60
+        port: 8383
+        timeout: 5
+      register: port_8383_status
+
+    - name: Show result for port 8383
+      debug:
+        msg: "Port 8383 is open on 172.16.17.60"
+      when: port_8383_status.elapsed < 5
+
+    - name: Check if port 8027 is open
+      win_wait_for:
+        host: 172.16.17.60
+        port: 8027
+        timeout: 5
+      register: port_8027_status
+
+    - name: Show result for port 8027
+      debug:
+        msg: "Port 8027 is open on 172.16.17.60"
+      when: port_8027_status.elapsed < 5
