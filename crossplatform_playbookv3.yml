@@ -97,7 +97,7 @@
     min_space_gb: 5
 
     # Windows-specific
-    csv_file_win: "C:\TEMP\UEMSAgent\WindowsAgent\site_map.csv"
+    csv_file_win: "C:\\TEMP\\UEMSAgent\\WindowsAgent\\site_map.csv"
     installers:
       LocalOffice: "LocalOffice_Agent.exe"
       TestOffice: "TestOffice_Agent.exe"
@@ -112,7 +112,7 @@
     registry_paths:
       patch: 'HKLM:\SOFTWARE\WOW6432Node\AdventNet\DesktopCentral\DCAgent\Patch'
       agent: 'HKLM:\SOFTWARE\WOW6432Node\AdventNet\DesktopCentral\DCAgent'
-    install_dir_win: "C:\TEMP\UEMSAgent\WindowsAgent"
+    install_dir_win: "C:\\TEMP\\UEMSAgent\\WindowsAgent"
     local_repo_path: "/tmp/WindowsAgent"
 
     # Linux-specific
