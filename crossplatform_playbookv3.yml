@@ -260,32 +260,12 @@
         - name: Check CPU threads
           command: nproc
           register: cpu_threads_result
-          
-
-        - name: Assert CPU threads
-          assert:
-            that: cpu_threads_result.stdout | int >= min_cpu_threads
-            fail_msg: "Not enough CPU threads. Required: {{ min_cpu_threads }}, Available: {{ cpu_threads_result.stdout }}"
-
-        - name: Check RAM
-          assert:
-            that: "{{ (ansible_memtotal_mb / 1024) | round >= min_ram_gb }}"
-            fail_msg: "Not enough memory. Required: {{ min_ram_gb }} GB, Aavailable: {{ (ansible_memtotal_mb / 1024) | round }} GB"
+         
 
         - name: Check disk space
           command: df --output=avail -BG /
           register: disk_output
-          
-
-        - name: Parse disk space
-          set_fact:
-            free_space_gb: "{{ disk_output.stdout_lines[1] | regex_replace('[^0-9]', '') | int }}"
-
-        - name: Assert disk space
-          assert:
-            that:
-              - free_space_gb | int >= min_space_gb | int
-            fail_msg: "Not enough disk space. Required: {{ min_space_gb }} GB, Available: {{ free_space_gb }} GB"
+         
 
         - name: Fail if system resources are insufficient
           fail:
@@ -294,7 +274,7 @@
             msg: "Required Memory: {{ min_ram_gb }} GB, Available: {{ (ansible_memtotal_mb / 1024) | round }} GB"
             msg: "Required Disk space: {{ min_space_gb }} GB, Available: {{ free_space_gb }} GB"
           when: cpu_threads_result.stdout | int <  min_cpu_threads or
-                (ansible_memtotal_mb / 1024) < min_ram_gb or
+                "{{ (ansible_memtotal_mb / 1024) | round < min_ram_gb }}" or
                 free_space_gb | int < min_space_gb | int
         
 
