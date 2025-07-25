@@ -433,6 +433,10 @@
               {% else %}
                 ""
               {% endif %}
+              
+        - name: Clean Target IP
+          set_fact:
+            target_ip: "{{ target_ip | trim}}"
 
         - name: Fail if target IP not Set
           fail:
@@ -478,6 +482,10 @@
               {% else %}
                 ""
               {% endif %}
+
+        - name: Clean DS IP
+          set_fact:
+            ds_server_ip: "{{ ds_server_ip | trim}}"
 
         - name: Fail if DS server IP is not set
           fail:
