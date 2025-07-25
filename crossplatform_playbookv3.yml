@@ -401,10 +401,25 @@
           file:
             path: "{{ install_dir_linux }}"
             state: absent
+      
+        - name: Set target IP based on site_code
+          set_fact:
+            target_ip: >-
+              {% if 'UAT' in site_code %}
+                {{ UATPMP }}             
+              {% elif 'PRD' in site_code %}
+                {{ PRDPMP }}
+              {% else %}
+                ""
+              {% endif %}
+
+        - name: Fail if target IP not Set
+          fail:
+            msg: "Could Not determine target IP for site code "{{ site_code }}"
 
         - name: Netowrk Service port Checking
           wait_for: 
-            host: 172.16.17.60
+            host: "{{ target_ip }}"
             port: "{{ item }}"
             timeout: 5
           loop:
