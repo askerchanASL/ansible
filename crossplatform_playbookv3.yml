@@ -310,7 +310,7 @@
                 register: port_check_results
 
             - name: Set DS server IP based on site_code
-              set_fact:
+              set_fact:                
                 win_ds_server_ip: >-
                   {% if site_code == 'IFCOAUAT' %}
                     {{ IFCOAUATDS }}
@@ -342,7 +342,7 @@
 
             - name: Clean DS IP
               set_fact:
-              win_ds_server_ip: "{{ win_ds_server_ip | trim}}"
+                win_ds_server_ip: "{{ win_ds_server_ip | trim}}"
 
             - name: DS Service port Checking
               win_wait_for: 
