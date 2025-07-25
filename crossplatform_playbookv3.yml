@@ -261,11 +261,13 @@
           command: nproc
           register: cpu_threads_result
          
-
         - name: Check disk space
           command: df --output=avail -BG /
           register: disk_output
-         
+          
+        - name: Parse disk space
+          set_fact: 
+            free_space_gb: "{{ disk_output.stdout_lines[1] | regex_replace('[^0-9]', '') | int }}"
 
         - name: Fail if system resources are insufficient
           fail:
