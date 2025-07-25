@@ -281,7 +281,7 @@
 
 
         - name: Check CPU threads
-          command: nproc
+          command: sudo nproc
           register: cpu_threads_result
 
         - name: Check Memory
