@@ -406,9 +406,29 @@
         - name: Set target IP based on site_code
           set_fact:
             target_ip: >-
-              {% if 'UAT' in site_code %}
-                {{ UATPMP }}             
-              {% elif 'PRD' in site_code %}
+              {% if site_code == 'IFCOAUAT' %}
+                {{ UATPMP }}
+              {% elif site_code == 'IFCOAPRD' %}
+                {{ PRDPMP }}
+              {% elif site_code == 'IFCDMZUAT' %}
+                {{ UATPMP }}
+              {% elif site_code == 'IFCDMZPRD' %}
+                {{ PRDPMP }}
+              {% elif site_code == 'KCCOAUAT' %}
+                {{ UATPMP }}
+              {% elif site_code == 'KCCOAPRD' %}
+                {{ PRDPMP }}
+              {% elif site_code == 'KCCDMZUAT' %}
+                {{ UATPMP }}
+              {% elif site_code == 'KCCDMZPRD' %}
+                {{ PRDPMP }}
+              {% elif site_code == 'LZInternalUAT' %}
+                {{ UATPMP }}
+              {% elif site_code == 'LZInternalPRD' %}
+                {{ PRDPMP }}
+              {% elif site_code == 'LZDMZUAT' %}
+                {{ UATPMP }}
+              {% elif site_code == 'LZDMZPRD' %}
                 {{ PRDPMP }}
               {% else %}
                 ""
@@ -418,7 +438,7 @@
           fail:
             msg: "Could Not determine target IP for site code '{{ site_code }}'"
 
-        - name: Netowrk Service port Checking
+        - name: PMP Service port Checking
           wait_for: 
             host: "{{ target_ip }}"
             port: "{{ item }}"
@@ -427,6 +447,49 @@
             - 8383
             - 8027
           register: port_check_results
+
+        - name: Set DS server IP based on site_code
+          set_fact:
+            ds_server_ip: >-
+              {% if site_code == 'IFCOAUAT' %}
+                {{ IFCOAUATDS }}
+              {% elif site_code == 'IFCOAPRD' %}
+                {{ IFCOAPRDDS }}
+              {% elif site_code == 'IFCDMZUAT' %}
+                {{ IFCDMZUATDS }}
+              {% elif site_code == 'IFCDMZPRD' %}
+                {{ IFCDMZPRDDS }}
+              {% elif site_code == 'KCCOAUAT' %}
+                {{ KCCOAUATDS }}
+              {% elif site_code == 'KCCOAPRD' %}
+                {{ KCCOAPRDDS }}
+              {% elif site_code == 'KCCDMZUAT' %}
+                {{ KCCDMZUAT }}
+              {% elif site_code == 'KCCDMZPRD' %}
+                {{ KCCDMZPRDDS }}
+              {% elif site_code == 'LZInternalUAT' %}
+                {{ LZInternalUATDS }}
+              {% elif site_code == 'LZInternalPRD' %}
+                {{ LZInternalPRDDS }}
+              {% elif site_code == 'LZDMZUAT' %}
+                {{ LZDMZUATDS }}
+              {% elif site_code == 'LZDMZPRD' %}
+                {{ LZDMZPRDDS }}
+              {% else %}
+                ""
+              {% endif %}
+
+          - name: Fail if DS server IP is not set
+            fail:
+              msg: "Could not determine DS server IP for site code '{{ site_code }}'."
+            when: ds_server_ip == ""
+
+          - name: DS Service port Checking
+            wait_for: 
+            host: "{{ ds_server_ip }}"
+            port: 8384
+            timeout: 5
+
 
         
         
