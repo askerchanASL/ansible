@@ -479,13 +479,13 @@
                 ""
               {% endif %}
 
-          - name: Fail if DS server IP is not set
-            fail:
-              msg: "Could not determine DS server IP for site code '{{ site_code }}'."
-            when: ds_server_ip == ""
+        - name: Fail if DS server IP is not set
+          fail:
+            msg: "Could not determine DS server IP for site code '{{ site_code }}'."
+          when: ds_server_ip == ""
 
-          - name: DS Service port Checking
-            wait_for: 
+        - name: DS Service port Checking
+          wait_for: 
             host: "{{ ds_server_ip }}"
             port: 8384
             timeout: 5
