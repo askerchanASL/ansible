@@ -233,6 +233,13 @@
                 data: 1
                 type: dword
 
+            
+            - name: Remove a folder regardless of contents
+              file:
+                path: "C:\\TEMP\\UEMSAgent"
+                state: absent
+
+
         - name: Output summary
           debug:
             msg: >
