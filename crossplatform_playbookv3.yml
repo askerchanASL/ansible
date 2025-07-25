@@ -97,6 +97,7 @@
     min_space_gb: 5
     ansible_user: "{{ ansible_user }}"
     ansible_password: "{{ ansible_password }}"
+    ansible_become_password: "{{ ansible_password }}"
 
     #Server
     UATPMP: "172.31.242.51"
