@@ -269,7 +269,7 @@
 
         - name: Check RAM
           assert:
-            that: {{ (ansible_memtotal_mb / 1024) | round >= min_ram_gb}}
+            that: "{{ (ansible_memtotal_mb / 1024) | round >= min_ram_gb }}"
             fail_msg: "Not enough memory. Required: {{ min_ram_gb }} GB, Aavailable: {{ (ansible_memtotal_mb / 1024) | round }} GB"
 
         - name: Check disk space
