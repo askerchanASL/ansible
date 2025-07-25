@@ -266,7 +266,7 @@
 
             - name: Set target IP based on site_code
               set_fact:
-                target_ip: >-
+                win_target_ip: >-
                   {% if site_code == 'IFCOAUAT' %}
                     {{ UATPMP }}
                   {% elif site_code == 'IFCOAPRD' %}
@@ -297,11 +297,11 @@
               
             - name: Clean Target IP
               set_fact:
-                target_ip: "{{ target_ip | trim}}"
+                win_target_ip: "{{ win_target_ip | trim}}"
 
             - name: PMP Service port Checking
               win_wait_for: 
-                host: "{{ target_ip }}"
+                host: "{{ win_target_ip }}"
                 port: "{{ item }}"
                 timeout: 5
                 loop:
@@ -311,7 +311,7 @@
 
             - name: Set DS server IP based on site_code
               set_fact:
-              ds_server_ip: >-
+              win_ds_server_ip: >-
                   {% if site_code == 'IFCOAUAT' %}
                     {{ IFCOAUATDS }}
                   {% elif site_code == 'IFCOAPRD' %}
@@ -342,11 +342,11 @@
 
             - name: Clean DS IP
               set_fact:
-              ds_server_ip: "{{ ds_server_ip | trim}}"
+              win_ds_server_ip: "{{ win_ds_server_ip | trim}}"
 
             - name: DS Service port Checking
               win_wait_for: 
-                host: "{{ ds_server_ip }}"
+                host: "{{ win_ds_server_ip }}"
                 port: 8384
                 timeout: 5
 
