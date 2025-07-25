@@ -415,7 +415,7 @@
 
         - name: Fail if target IP not Set
           fail:
-            msg: "Could Not determine target IP for site code "{{ site_code }}"
+            msg: "Could Not determine target IP for site code '{{ site_code }}'"
 
         - name: Netowrk Service port Checking
           wait_for: 
