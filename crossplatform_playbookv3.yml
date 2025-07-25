@@ -260,7 +260,7 @@
 
             
             - name: Remove a folder regardless of contents
-              file:
+              win_file:
                 path: "C:\\TEMP\\UEMSAgent"
                 state: absent
 
