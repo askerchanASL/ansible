@@ -93,7 +93,7 @@
     min_cpu_threads: 2
     min_memory_gb: 4
     min_disk_gb: 10
-    min_ram_gb: 3.5
+    min_ram_gb: 16
     min_space_gb: 5
 
     # Windows-specific
