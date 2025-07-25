@@ -141,16 +141,7 @@
       when: ansible_os_family == 'Windows'
       block:
 
-        - name: Create installation directory on Windows
-          win_file:
-            path: "{{ install_dir_win }}"
-            state: directory
 
-        - name: Copy all installation files to Windows
-          win_copy:
-            src: "{{ local_repo_path }}/WindowsAgent"
-            dest: C:\\TEMP\\UEMSAgent
-            recurse: yes
 
         - name: Check CPU threads
           win_shell: "(Get-WmiObject -Class Win32_Processor).NumberOfLogicalProcessors"
@@ -170,6 +161,17 @@
           when: cpu_threads.stdout | int < min_cpu_threads or
                 total_memory.stdout | int < min_memory_gb or
                 free_space.stdout | int < min_disk_gb
+
+        - name: Create installation directory on Windows
+          win_file:
+            path: "{{ install_dir_win }}"
+            state: directory
+
+        - name: Copy all installation files to Windows
+          win_copy:
+            src: "{{ local_repo_path }}/WindowsAgent"
+            dest: C:\\TEMP\\UEMSAgent
+            recurse: yes
 
         - name: Read site_map.csv and find site/team
           win_shell: |
@@ -257,14 +259,6 @@
       become: yes
       block:
 
-        - name: Copy UEMS Linux Agent to target
-          ansible.builtin.copy:
-            src: "/tmp/ME/LinuxAgent/"
-            dest: "{{ install_dir_linux }}"
-            mode: '0755'
-            owner: root
-            group: root
-            remote_src: no
 
         - name: Check CPU threads
           command: nproc
@@ -293,7 +287,15 @@
           when: cpu_threads_result.stdout | int <  min_cpu_threads or
                 ram_output | int < min_ram_gb or
                 free_space_gb | int < min_space_gb | int
-        
+
+        - name: Copy UEMS Linux Agent to target
+          ansible.builtin.copy:
+            src: "/tmp/ME/LinuxAgent/"
+            dest: "{{ install_dir_linux }}"
+            mode: '0755'
+            owner: root
+            group: root
+            remote_src: no
 
         - name: Get hostname and IP
           set_fact:
