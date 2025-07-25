@@ -311,7 +311,7 @@
 
             - name: Set DS server IP based on site_code
               set_fact:
-              win_ds_server_ip: >-
+                win_ds_server_ip: >-
                   {% if site_code == 'IFCOAUAT' %}
                     {{ IFCOAUATDS }}
                   {% elif site_code == 'IFCOAPRD' %}
