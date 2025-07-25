@@ -260,7 +260,7 @@
         - name: Check CPU threads
           command: nproc
           register: cpu_threads_result
-          changed_when: false
+          
 
         - name: Assert CPU threads
           assert:
@@ -269,13 +269,13 @@
 
         - name: Check RAM
           assert:
-            that: (ansible_memtotal_mb / 1024) >= min_ram_gb
-            fail_msg: Not enough memory.
+            that: {{ (ansible_memtotal_mb / 1024) | round }} >= min_ram_gb
+            fail_msg: "Not enough memory. Required: {{ min_ram_gb }} GB, Aavailable: {{ (ansible_memtotal_mb / 1024) | round }} GB"
 
         - name: Check disk space
           command: df --output=avail -BG /
           register: disk_output
-          changed_when: false
+          
 
         - name: Parse disk space
           set_fact:
@@ -286,6 +286,17 @@
             that:
               - free_space_gb | int >= min_space_gb | int
             fail_msg: "Not enough disk space. Required: {{ min_space_gb }} GB, Available: {{ free_space_gb }} GB"
+
+        - name: Fail if system resources are insufficient
+          fail:
+            msg: "System does not meet minimum requirements."
+            msg: "Required CPU: {{ min_cpu_threads }} threads, Available: {{ cpu_threads_result.stdout }}"
+            msg: "Required Memory: {{ min_ram_gb }} GB, Aavailable: {{ (ansible_memtotal_mb / 1024) | round }} GB"
+            msg: "Required Disk space: {{ min_space_gb }} GB, Available: {{ free_space_gb }} GB"
+          when: cpu_threads_result.stdout | int <  min_cpu_threads or
+                (ansible_memtotal_mb / 1024) < min_ram_gb or
+                free_space_gb | int < min_space_gb | int
+        
 
         - name: Get hostname and IP
           set_fact:
