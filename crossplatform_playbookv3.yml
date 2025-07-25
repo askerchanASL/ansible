@@ -267,13 +267,13 @@
             - name: Set target IP based on site_code
               set_fact:
                 win_target_ip: >-
-                  {% if site == 'IFCOAUAT' %}
+                  {% if {{ site }} == 'IFCOAUAT' %}
                     {{ UATPMP }}
-                  {% elif site == 'IFCOAPRD' %}
+                  {% elif {{ site }} == 'IFCOAPRD' %}
                     {{ PRDPMP }}
-                  {% elif site == 'IFCDMZUAT' %}
+                  {% elif {{ site }} == 'IFCDMZUAT' %}
                     {{ UATPMP }}
-                  {% elif site == 'IFCDMZPRD' %}
+                  {% elif {{ site }} == 'IFCDMZPRD' %}
                     {{ PRDPMP }}
                   {% elif site == 'KCCOAUAT' %}
                     {{ UATPMP }}
