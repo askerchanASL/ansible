@@ -98,6 +98,23 @@
     ansible_user: "{{ ansible_user }}"
     ansible_password: "{{ ansible_password }}"
 
+    #Server
+    UATPMP: "172.31.242.51"
+    IFCOAUATDS: "172.31.242.54"
+    IFCDMZUATDS: "172.22.107.63"
+    KCCOAUATDS: "172.31.242.62"
+    KCCDMZUAT: "172.22.108.63"
+    LZInternalUATDS: "172.17.13.24"
+    LZDMZUATDS: "172.17.12.83"
+    PRDPMP: "172.31.242.50"
+    IFCOAPRDDS: "172.31.242.53"
+    IFCDMZPRDDS: "172.22.105.63"
+    KCCOAPRDDS: "172.31.242.61"
+    KCCDMZPRDDS: "172.22.106.63"
+    LZInternalPRDDS: "172.18.13.10"
+    LZDMZPRDDS: "172.18.12.84"
+    
+
     # Windows-specific
     csv_file_win: "C:\\TEMP\\UEMSAgent\\WindowsAgent\\site_map.csv"
     installers:
@@ -384,3 +401,22 @@
           file:
             path: "{{ install_dir_linux }}"
             state: absent
+
+        - name: Netowrk Service port Checking
+          wait_for: 
+            host: 172.16.17.60
+            port: "{{ item }}"
+            timeout: 5
+          loop:
+            - 8383
+            - 8027
+          register: port_check_results
+
+        
+        
+
+
+
+
+
+        
