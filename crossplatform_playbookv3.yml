@@ -121,6 +121,18 @@
     installers:
       LocalOffice: "LocalOffice_Agent.exe"
       TestOffice: "TestOffice_Agent.exe"
+      IFCOAPRD: "IFCOAPRD_Agent.exe"
+      IFCDMZPRD: "IFCDMZPRD_Agent.exe"
+      KCCOAPRD: "KCCOAPRD_Agent.exe"
+      KCCDMZPRD: "KCCDMZPRD_Agent.exe"
+      LZInternalPRD: "LZInternalPRD_Agent.exe"
+      LZDMZPRD: "LZDMZPRD_Agent.exe"
+      IFCOAUAT: "IFCOAUAT_Agent.exe"
+      IFCDMZUAT: "IFCDMZUAT_Agent.exe"
+      KCCOAUAT: "KCCOAUAT_Agent.exe"
+      KCCDMZUAT: "KCCDMZUAT_Agent.exe"
+      LZInternalUAT: "LZInternalUAT_Agent.exe"
+      LZDMZUAT: "LZDMZUAT_Agent.exe"
     team_day_map:
       ITAS1: "1"
       ITAS2: "2"
