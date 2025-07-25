@@ -95,6 +95,8 @@
     min_disk_gb: 5
     min_ram_gb: 4
     min_space_gb: 5
+    ansible_user: "{{ ansible_user }}"
+    ansible_password: "{{ ansible_password }}"
 
     # Windows-specific
     csv_file_win: "C:\\TEMP\\UEMSAgent\\WindowsAgent\\site_map.csv"
