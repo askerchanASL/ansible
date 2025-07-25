@@ -162,7 +162,7 @@
           win_shell: "(Get-WmiObject -Class Win32_LogicalDisk -Filter \"DeviceID='C:'\").FreeSpace / 1GB"
           register: free_space
 
-        - name: Fail if system resources are insufficient
+        - name: Fail if system resources are insufficient (Windows)
           fail:
             msg: "System does not meet minimum requirements."
           when: cpu_threads.stdout | int < min_cpu_threads or
@@ -274,17 +274,16 @@
           set_fact: 
             free_space_gb: "{{ disk_output.stdout_lines[1] | regex_replace('[^0-9]', '') | int }}"
 
-        - name: Fail if system resources are insufficient
+        - name: Fail if system resources are insufficient (Linux)
           fail:
             msg: |
               System does not meet minimum requirements.
               Required CPU: {{ min_cpu_threads }} threads, Available: {{ cpu_threads_result.stdout }}
               Required Memory: {{ min_ram_gb }} GB, Available: {{ (ansible_memtotal_mb / 1024) | round }} GB
               Required Disk space: {{ min_space_gb }} GB, Available: {{ free_space_gb }} GB
-          when: 
-            - cpu_threads_result.stdout | int <  min_cpu_threads 
-            - ram_output | int < min_ram_gb
-            - free_space_gb | int < min_space_gb | int
+          when: cpu_threads_result.stdout | int <  min_cpu_threads or
+                ram_output | int < min_ram_gb or
+                free_space_gb | int < min_space_gb | int
         
 
         - name: Get hostname and IP
