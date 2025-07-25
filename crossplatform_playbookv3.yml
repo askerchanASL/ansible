@@ -239,6 +239,10 @@
           set_fact:
             team_clean: "{{ team | trim }}"
 
+        - name: Clean up Site Code
+          set_fact:
+            site_clean: "{{ site | trim }}"
+
         - name: Set registry values if install succeeded
           when: install_result.rc == 0
           block:
@@ -279,29 +283,29 @@
             - name: Set target IP based on site_code
               set_fact:
                 win_target_ip: >-
-                  {% if {{ site }} == 'IFCOAUAT' %}
+                  {% if site_clean == 'IFCOAUAT' %}
                     {{ UATPMP }}
-                  {% elif {{ site }} == 'IFCOAPRD' %}
+                  {% elif site_clean == 'IFCOAPRD' %}
                     {{ PRDPMP }}
-                  {% elif {{ site }} == 'IFCDMZUAT' %}
+                  {% elif site_clean == 'IFCDMZUAT' %}
                     {{ UATPMP }}
-                  {% elif {{ site }} == 'IFCDMZPRD' %}
+                  {% elif site_clean == 'IFCDMZPRD' %}
                     {{ PRDPMP }}
-                  {% elif site == 'KCCOAUAT' %}
+                  {% elif site_clean == 'KCCOAUAT' %}
                     {{ UATPMP }}
-                  {% elif site == 'KCCOAPRD' %}
+                  {% elif site_clean == 'KCCOAPRD' %}
                     {{ PRDPMP }}
-                  {% elif site == 'KCCDMZUAT' %}
+                  {% elif site_clean == 'KCCDMZUAT' %}
                     {{ UATPMP }}
-                  {% elif site == 'KCCDMZPRD' %}
+                  {% elif site_clean == 'KCCDMZPRD' %}
                     {{ PRDPMP }}
-                  {% elif site == 'LZInternalUAT' %}
+                  {% elif site_clean == 'LZInternalUAT' %}
                     {{ UATPMP }}
-                  {% elif site == 'LZInternalPRD' %}
+                  {% elif site_clean == 'LZInternalPRD' %}
                     {{ PRDPMP }}
-                  {% elif site == 'LZDMZUAT' %}
+                  {% elif site_clean == 'LZDMZUAT' %}
                     {{ UATPMP }}
-                  {% elif site == 'LZDMZPRD' %}
+                  {% elif site_clean == 'LZDMZPRD' %}
                     {{ PRDPMP }}
                   {% else %}
                     ""
