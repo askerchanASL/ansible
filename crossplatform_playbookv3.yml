@@ -267,29 +267,29 @@
             - name: Set target IP based on site_code
               set_fact:
                 win_target_ip: >-
-                  {% if site_code == 'IFCOAUAT' %}
+                  {% if site_info == 'IFCOAUAT' %}
                     {{ UATPMP }}
-                  {% elif site_code == 'IFCOAPRD' %}
+                  {% elif site_info == 'IFCOAPRD' %}
                     {{ PRDPMP }}
-                  {% elif site_code == 'IFCDMZUAT' %}
+                  {% elif site_info == 'IFCDMZUAT' %}
                     {{ UATPMP }}
-                  {% elif site_code == 'IFCDMZPRD' %}
+                  {% elif site_info == 'IFCDMZPRD' %}
                     {{ PRDPMP }}
-                  {% elif site_code == 'KCCOAUAT' %}
+                  {% elif site_info == 'KCCOAUAT' %}
                     {{ UATPMP }}
-                  {% elif site_code == 'KCCOAPRD' %}
+                  {% elif site_info == 'KCCOAPRD' %}
                     {{ PRDPMP }}
-                  {% elif site_code == 'KCCDMZUAT' %}
+                  {% elif site_info == 'KCCDMZUAT' %}
                     {{ UATPMP }}
-                  {% elif site_code == 'KCCDMZPRD' %}
+                  {% elif site_info == 'KCCDMZPRD' %}
                     {{ PRDPMP }}
-                  {% elif site_code == 'LZInternalUAT' %}
+                  {% elif site_info == 'LZInternalUAT' %}
                     {{ UATPMP }}
-                  {% elif site_code == 'LZInternalPRD' %}
+                  {% elif site_info == 'LZInternalPRD' %}
                     {{ PRDPMP }}
-                  {% elif site_code == 'LZDMZUAT' %}
+                  {% elif site_info == 'LZDMZUAT' %}
                     {{ UATPMP }}
-                  {% elif site_code == 'LZDMZPRD' %}
+                  {% elif site_info == 'LZDMZPRD' %}
                     {{ PRDPMP }}
                   {% else %}
                     ""
@@ -312,29 +312,29 @@
             - name: Set DS server IP based on site_code
               set_fact:                
                 win_ds_server_ip: >-
-                  {% if site_code == 'IFCOAUAT' %}
+                  {% if site_info == 'IFCOAUAT' %}
                     {{ IFCOAUATDS }}
-                  {% elif site_code == 'IFCOAPRD' %}
+                  {% elif site_info == 'IFCOAPRD' %}
                     {{ IFCOAPRDDS }}
-                  {% elif site_code == 'IFCDMZUAT' %}
+                  {% elif site_info == 'IFCDMZUAT' %}
                     {{ IFCDMZUATDS }}
-                  {% elif site_code == 'IFCDMZPRD' %}
+                  {% elif site_info == 'IFCDMZPRD' %}
                     {{ IFCDMZPRDDS }}
-                  {% elif site_code == 'KCCOAUAT' %}
+                  {% elif site_info == 'KCCOAUAT' %}
                     {{ KCCOAUATDS }}
-                  {% elif site_code == 'KCCOAPRD' %}
+                  {% elif site_info == 'KCCOAPRD' %}
                     {{ KCCOAPRDDS }}
-                  {% elif site_code == 'KCCDMZUAT' %}
+                  {% elif site_info == 'KCCDMZUAT' %}
                     {{ KCCDMZUAT }}
-                  {% elif site_code == 'KCCDMZPRD' %}
+                  {% elif site_info == 'KCCDMZPRD' %}
                     {{ KCCDMZPRDDS }}
-                  {% elif site_code == 'LZInternalUAT' %}
+                  {% elif site_info == 'LZInternalUAT' %}
                     {{ LZInternalUATDS }}
-                  {% elif site_code == 'LZInternalPRD' %}
+                  {% elif site_info == 'LZInternalPRD' %}
                     {{ LZInternalPRDDS }}
-                  {% elif site_code == 'LZDMZUAT' %}
+                  {% elif site_info == 'LZDMZUAT' %}
                     {{ LZDMZUATDS }}
-                  {% elif site_code == 'LZDMZPRD' %}
+                  {% elif site_info == 'LZDMZPRD' %}
                     {{ LZDMZPRDDS }}
                   {% else %}
                     ""
