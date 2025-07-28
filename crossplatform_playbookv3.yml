@@ -172,8 +172,14 @@
       block:
 
         - name: Check CPU threads
-          win_shell: "(Get-WmiObject -Class Win32_Processor).NumberOfLogicalProcessors"
+          win_shell: |
+            $cpu = Get-CimInstance -ClassName Win32_Processor
+            $cpu | ForEach-Object { $_.NumberOfLogicalProcessors }
           register: cpu_threads
+
+        - name: Calculate Total CPU threads
+          set_fact:
+            total_threads: "{{ cpu_threads.stdout_lines | map('int') | sum }}"
 
         - name: Check memory
           win_shell: "[math]::Round((Get-WmiObject -Class Win32_ComputerSystem).TotalPhysicalMemory / 1GB, 0)"
