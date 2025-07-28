@@ -197,7 +197,7 @@
               Required Memory: {{ min_memory_gb }} GB, Available: {{ total_memory }} GB
               Required Disk space: {{ min_disk_gb }} GB, Available: {{ free_space }} GB
               
-          when: cpu_threads.stdout | int < min_cpu_threads or
+          when: total_threads.stdout | int < min_cpu_threads or
                 total_memory.stdout | int < min_memory_gb or
                 free_space.stdout | int < min_disk_gb
 
