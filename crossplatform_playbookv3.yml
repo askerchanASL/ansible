@@ -193,11 +193,11 @@
           fail:
             msg: |
               System does not meet minimum requirements.
-              Required CPU: {{ min_cpu_threads }} threads, Available: {{ cpu_threads }}
+              Required CPU: {{ min_cpu_threads }} threads, Available: {{ total_threads }}
               Required Memory: {{ min_memory_gb }} GB, Available: {{ total_memory }} GB
               Required Disk space: {{ min_disk_gb }} GB, Available: {{ free_space }} GB
               
-          when: total_threads.stdout | int < min_cpu_threads or
+          when: total_threads < min_cpu_threads or
                 total_memory.stdout | int < min_memory_gb or
                 free_space.stdout | int < min_disk_gb
 
