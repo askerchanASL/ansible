@@ -4,17 +4,17 @@
   gather_facts: false
   vars:
     # Default to using ansible_user/ansible_password unless custom input is selected
-    ansible_user: "{{ ansible_user }}"
-    ansible_password: "{{ ansible_password }}"
+    #ansible_user: "{{ ansible_user }}"
+    #ansible_password: "{{ ansible_password }}"
 
 
   tasks:
-    - name: Debug credential usage
-      debug:
-        msg:
+    #- name: Debug credential usage
+     # debug:
+      #  msg:
           
-          - "Username: {{ ansible_user }}"
-          - "Password: {{ '******' if ansible_password else 'Not Set' }}"
+       #   - "Username: {{ ansible_user }}"
+        #  - "Password: {{ '******' if ansible_password else 'Not Set' }}"
 
     - name: Get hostname
       win_shell: hostname
