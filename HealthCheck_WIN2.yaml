@@ -34,8 +34,9 @@
 
     - name: Get list of running services
       win_shell: >
-        Get-Service | Where-Object {$_.Status -eq "Running"} | Select-Object
-        Name, DisplayName, Status
+        $hostname = $env:COMPUTERNAME;
+        Get-Service | Where-Object {$_.Status -eq "Running"} | Select-Object @{Name="Hostname";Expression={$hostname}}, Name, DisplayName, Status
+
       register: running_services
 
     - name: Display running services
