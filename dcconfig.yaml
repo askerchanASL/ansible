@@ -1,0 +1,9 @@
+---
+- name: dcconfig refresh
+  hosts: " {{ selected_group }} "
+  become: yes
+  tasks:
+    - name: Run dcconfig refresh
+      command: ./dcconfig refresh
+      args:
+        chdir: /usr/local/manageengine/uems_agent
