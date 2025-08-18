@@ -4,6 +4,7 @@
   become: yes
   tasks:
     - name: Run dcconfig refresh
-      command: ./dcconfig refresh
+      command: sudo ./dcconfig refresh
       args:
-        chdir: /usr/local/manageengine/uems_agent
+        chdir: /usr/local/manageengine/uems_agent/bin/
+
