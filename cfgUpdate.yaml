@@ -4,4 +4,5 @@
   gather_facts: no
   tasks:
     - name: Execute cfgUpdate.exe
-      win_command: '"C:\Program Files (x86)\ManageEngine\UEMS_Agent\bin\cfgUpdate.exe"'
+      win_command: '"C:\\Program Files (x86)\\ManageEngine\\UEMS_Agent\\bin\\cfgUpdate.exe"'
+
