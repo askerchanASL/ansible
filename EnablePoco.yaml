@@ -1,0 +1,53 @@
+---
+- name: Configure DesktopCentral Agent via Registry
+  hosts: " {{ selected_group }} "
+  gather_facts: no
+  tasks:
+
+    - name: Get processor architecture
+      win_reg_stat:
+        path: HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment
+        name: PROCESSOR_ARCHITECTURE
+      register: arch_result
+
+    - name: Set registry paths based on architecture
+      set_fact:
+        regPath: >-
+          {{ 'HKLM\SOFTWARE\WOW6432Node\AdventNet\DesktopCentral\DCAgent' if arch_result.value == 'AMD64' else 'HKLM\SOFTWARE\AdventNet\DesktopCentral\DCAgent' }}
+        NSregPath: >-
+          {{ 'HKLM\SOFTWARE\WOW6432Node\AdventNet\DesktopCentral\DCAgent\NSStatusDetails' if arch_result.value == 'AMD64' else 'HKLM\SOFTWARE\AdventNet\DesktopCentral\DCAgent\NSStatusDetails' }}
+
+    - name: Add forceenablepoco registry value
+      win_regedit:
+        path: "{{ regPath }}"
+        name: forceenablepoco
+        data: 1
+        type: dword
+        state: present
+
+    - name: Add NSStatusLastRetriveTime registry value
+      win_regedit:
+        path: "{{ NSregPath }}"
+        name: NSStatusLastRetriveTime
+        data: 0
+        type: dword
+        state: present
+
+    - name: Get DCAgentInstallDir
+      win_reg_stat:
+        path: "{{ regPath }}"
+        name: DCAgentInstallDir
+      register: install_dir_result
+
+    - name: Set install directory path
+      set_fact:
+        installdir: "{{ install_dir_result.value }}\\bin\\"
+
+    - name: Restart ManageEngine UEMS - Agent service
+      win_service:
+        name: "ManageEngine UEMS - Agent"
+        state: restarted
+
+    - name: Output install directory
+      debug:
+        msg: "Install directory is {{ installdir }}"
