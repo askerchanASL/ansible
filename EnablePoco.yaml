@@ -6,9 +6,8 @@
 
     - name: Get processor architecture
       win_reg_stat:
-        path: SYSTEM\CurrentControlSet\Control\Session Manager\Environment
-        name: PROCESSOR_ARCHITECTURE
-        hive: HKEY_LOCAL_MACHINE
+        path: 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment'
+        name: PROCESSOR_ARCHITECTURE      
       register: arch_result
 
     - name: Set registry paths based on architecture
