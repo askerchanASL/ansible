@@ -13,9 +13,9 @@
     - name: Set registry paths based on architecture
       set_fact:
         regPath: >-
-          {{ 'HKLM\SOFTWARE\WOW6432Node\AdventNet\DesktopCentral\DCAgent' if arch_result.value == 'AMD64' else 'HKLM\SOFTWARE\AdventNet\DesktopCentral\DCAgent' }}
+          {{ 'HKLM:\SOFTWARE\WOW6432Node\AdventNet\DesktopCentral\DCAgent' if arch_result.value == 'AMD64' else 'HKLM:\SOFTWARE\AdventNet\DesktopCentral\DCAgent' }}
         NSregPath: >-
-          {{ 'HKLM\SOFTWARE\WOW6432Node\AdventNet\DesktopCentral\DCAgent\NSStatusDetails' if arch_result.value == 'AMD64' else 'HKLM\SOFTWARE\AdventNet\DesktopCentral\DCAgent\NSStatusDetails' }}
+          {{ 'HKLM:\SOFTWARE\WOW6432Node\AdventNet\DesktopCentral\DCAgent\NSStatusDetails' if arch_result.value == 'AMD64' else 'HKLM:\SOFTWARE\AdventNet\DesktopCentral\DCAgent\NSStatusDetails' }}
 
     - name: Add forceenablepoco registry value
       win_regedit:
