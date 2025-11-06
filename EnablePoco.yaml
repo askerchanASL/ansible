@@ -33,21 +33,13 @@
         type: dword
         state: present
 
-    - name: Get DCAgentInstallDir
-      win_reg_stat:
-        path: "{{ regPath }}"
-        name: DCAgentInstallDir
-      register: install_dir_result
-
-    - name: Set install directory path
-      set_fact:
-        installdir: "{{ install_dir_result.value }}\\bin\\"
+    - name: Set Service to Auto
+      win_service:
+        name: "ManageEngine UEMS - Agent"
+        start_mode: auto
 
     - name: Restart ManageEngine UEMS - Agent service
       win_service:
         name: "ManageEngine UEMS - Agent"
         state: restarted
 
-    - name: Output install directory
-      debug:
-        msg: "Install directory is {{ installdir }}"
