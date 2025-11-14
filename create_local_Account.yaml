@@ -1,0 +1,22 @@
+---
+- name: Create Windows local account using encrypted password from GitLab
+  hosts: all
+  gather_facts: no
+  tasks:
+    - name: Read AES key from project directory
+      set_fact:
+        aes_key: "{{ lookup('file', playbook_dir + '/AES.key') }}"
+
+    - name: Read encrypted password from project directory
+      set_fact:
+        encrypted_pass: "{{ lookup('file', playbook_dir + '/pass.txt') }}"
+
+    - name: Decrypt password
+      set_fact:
+        decrypted_pass: "{{ encrypted_pass | custom_decrypt(aes_key) }}"
+
+    - name: Create local user
+      win_user:
+        name: testlocaluser
+        password: "{{ decrypted_pass }}"
+        state: present
