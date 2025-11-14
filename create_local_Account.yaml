@@ -1,36 +1,53 @@
 ---
-- name: Create Windows local account using PowerShell-encrypted password
+- name: Create Windows local account using AES-encrypted password
   hosts: all
   gather_facts: no
   tasks:
-    - name: Copy AES key to Windows
+    - name: Copy AES key to target
       win_copy:
         src: "{{ playbook_dir }}/AES.key"
         dest: "C:\\temp\\AES.key"
 
-    - name: Copy encrypted password to Windows
+    - name: Copy encrypted password to target
       win_copy:
         src: "{{ playbook_dir }}/pass.txt"
         dest: "C:\\temp\\pass.txt"
 
-    - name: Decrypt password using PowerShell
+    - name: Decrypt password and create user
       win_shell: |
-        $SecureString = Get-Content "C:\\temp\\pass.txt" | ConvertTo-SecureString
+        Add-Type -AssemblyName System.Security
+        Add-Type -AssemblyName System.Runtime.InteropServices
+
+        # Read key and encrypted password
         $Key = Get-Content "C:\\temp\\AES.key"
-        $PlainText = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto(
-            [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($SecureString)
-        )
-        Write-Output $PlainText
-      register: decrypted_password
+        $Encrypted = Get-Content "C:\\temp\\pass.txt"
+
+        # Convert Base64 to bytes
+        $EncryptedBytes = [Convert]::FromBase64String($Encrypted)
+
+        # Create AES object
+        $AES = [System.Security.Cryptography.AesManaged]::new()
+        $AES.Mode = [System.Security.Cryptography.CipherMode]::ECB
+        $AES.Padding = [System.Security.Cryptography.PaddingMode]::PKCS7
+        $AES.Key = [Text.Encoding]::UTF8.GetBytes($Key)
+
+        # Decrypt
+        $Decryptor = $AES.CreateDecryptor()
+        $PlainBytes = $Decryptor.TransformFinalBlock($EncryptedBytes, 0, $EncryptedBytes.Length)
+        $PlainText = [Text.Encoding]::UTF8.GetString($PlainBytes)
+
+        # Create local user
+        net user mylocaluser $PlainText /add
+      args:
+        executable: powershell
 
     
-    - name: Show decrypted password for verification
-      debug:
-        msg: "Decrypted password is: {{ decrypted_password }}"
+    - name: Remove AES key file
+      win_file:
+        path: "C:\\temp\\AES.key"
+        state: absent
 
-
-    - name: Create local user
-      win_user:
-        name: mylocaluser
-        password: "{{ decrypted_password.stdout }}"
-        state: present
+    - name: Remove encrypted password file
+      win_file:
+        path: "C:\\temp\\pass.txt"
+        state: absent
