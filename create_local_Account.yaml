@@ -22,7 +22,12 @@
         )
         Write-Output $PlainText
       register: decrypted_password
-      msg: "Decrypted password is: {{ decrypted_pass }}"
+
+    
+    - name: Show decrypted password for verification
+      debug:
+        msg: "Decrypted password is: {{ decrypted_password }}"
+
 
     - name: Create local user
       win_user:
