@@ -19,7 +19,7 @@
         Add-Type -AssemblyName System.Runtime.InteropServices
 
         # Read key and encrypted password
-        $Key = Get-Content "C:\\temp\\AES.key"
+        $Key = Get-Content "C:\\temp\\AES.key" -Encoding Byte
         $Encrypted = Get-Content "C:\\temp\\pass.txt"
 
         # Convert Base64 to bytes
@@ -29,7 +29,7 @@
         $AES = [System.Security.Cryptography.AesManaged]::new()
         $AES.Mode = [System.Security.Cryptography.CipherMode]::ECB
         $AES.Padding = [System.Security.Cryptography.PaddingMode]::PKCS7
-        $AES.Key = [Text.Encoding]::UTF8.GetBytes($Key)
+        $AES.Key = $Key
 
         # Decrypt
         $Decryptor = $AES.CreateDecryptor()
