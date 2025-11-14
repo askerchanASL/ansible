@@ -10,6 +10,12 @@
   set_fact:
     decrypted_pass: "{{ encrypted_pass | custom_decrypt(aes_key) }}"
 
+
+- name: Show decrypted password for verification
+  debug:
+    msg: "Decrypted password is: {{ decrypted_pass }}"
+
+
 - name: Create local user
   win_user:
     name: mylocaluser
