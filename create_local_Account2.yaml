@@ -1,36 +1,17 @@
----
-- name: Create Windows local account using PowerShell-encrypted password
-  hosts: all
-  gather_facts: no
-  tasks:
-    - name: Copy AES key to Windows
-      win_copy:
-        src: "{{ playbook_dir }}/AES.key"
-        dest: "C:\\temp\\AES.key"
+- name: Read AES key
+  set_fact:
+    aes_key: "{{ lookup('file', playbook_dir + '/AES.key') }}"
 
-    - name: Copy encrypted password to Windows
-      win_copy:
-        src: "{{ playbook_dir }}/pass.txt"
-        dest: "C:\\temp\\pass.txt"
+- name: Read encrypted password
+  set_fact:
+    encrypted_pass: "{{ lookup('file', playbook_dir + '/pass.txt') }}"
 
-    - name: Decrypt password using PowerShell
-      win_shell: |
-        $SecureString = Get-Content "C:\\temp\\pass.txt" | ConvertTo-SecureString
-        $Key = Get-Content "C:\\temp\\AES.key"
-        $PlainText = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto(
-            [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($SecureString)
-        )
-        Write-Output $PlainText
-      register: decrypted_password
+- name: Decrypt password
+  set_fact:
+    decrypted_pass: "{{ encrypted_pass | custom_decrypt(aes_key) }}"
 
-    
-    - name: Show decrypted password for verification
-      debug:
-        msg: "Decrypted password is: {{ decrypted_password }}"
-
-
-    - name: Create local user
-      win_user:
-        name: mylocaluser
-        password: "{{ decrypted_password.stdout }}"
-        state: present
+- name: Create local user
+  win_user:
+    name: mylocaluser
+    password: "{{ decrypted_pass }}"
+    state: present
