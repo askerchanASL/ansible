@@ -10,7 +10,7 @@
 
     - name: Copy encrypted password to target
       win_copy:
-        src: "{{ playbook_dir }}/pass.txt"
+        src: "{{ playbook_dir }}/Pass2.txt"
         dest: "C:\\temp\\Pass2.txt"
 
     - name: Decrypt password and create user
