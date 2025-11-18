@@ -15,31 +15,20 @@
 
     - name: Decrypt password and create user
       win_shell: |
-        Add-Type -AssemblyName System.Security
-        Add-Type -AssemblyName System.Runtime.InteropServices
 
-        # Read key and encrypted password
-        $Key = Get-Content "C:\\temp\\AES.key" -Encoding Byte
-        $Encrypted = Get-Content "C:\\temp\\pass.txt"
+        $Key = Get-Content "C:\\temp\\AES.key"
+        $EncryptedPassword = Get-Content "C:\\temp\\pass.txt"
+        $SecurePassword = ConvertTo-SecureString $EncryptedPassword -Key $Key
+        $PlainText = [System.Net.NetworkCredential]::new("", $SecurePassword).Password
 
-        # Convert Base64 to bytes
-        $EncryptedBytes = [Convert]::FromBase64String($Encrypted)
 
-        # Create AES object
-        $AES = [System.Security.Cryptography.AesManaged]::new()
-        $AES.Mode = [System.Security.Cryptography.CipherMode]::ECB
-        $AES.Padding = [System.Security.Cryptography.PaddingMode]::PKCS7
-        $AES.Key = $Key
-
-        # Decrypt
-        $Decryptor = $AES.CreateDecryptor()
-        $PlainBytes = $Decryptor.TransformFinalBlock($EncryptedBytes, 0, $EncryptedBytes.Length)
-        $PlainText = [Text.Encoding]::UTF8.GetString($PlainBytes)
-
-        # Create local user
-        net user mylocaluser $PlainText /add
+        # Create local user if not exists
+        if (-not (Get-LocalUser -Name "mylocaluser")) {
+            net user mylocaluser $PlainText /add
+        }
       args:
         executable: powershell
+
 
     
     - name: Remove AES key file
