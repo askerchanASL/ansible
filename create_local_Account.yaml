@@ -11,12 +11,12 @@
     - name: Copy encrypted password to target
       win_copy:
         src: "{{ playbook_dir }}/pass.txt"
-        dest: "C:\\temp\\pass.txt"
+        dest: "C:\\temp\\Pass2.txt"
 
     - name: Decrypt password and create user
       win_shell: |
         $Key = Get-Content "C:\\temp\\AES.key"
-        $EncryptedPassword = Get-Content "C:\\temp\\pass.txt"
+        $EncryptedPassword = Get-Content "C:\\temp\\Pass2.txt"
         $SecurePassword = ConvertTo-SecureString $EncryptedPassword -Key $Key
         $PlainText = [System.Net.NetworkCredential]::new("", $SecurePassword).Password
 
@@ -33,5 +33,5 @@
 
     - name: Remove encrypted password file
       win_file:
-        path: "C:\\temp\\pass.txt"
+        path: "C:\\temp\\Pass2.txt"
         state: absent
