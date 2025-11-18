@@ -15,22 +15,17 @@
 
     - name: Decrypt password and create user
       win_shell: |
-
         $Key = Get-Content "C:\\temp\\AES.key"
         $EncryptedPassword = Get-Content "C:\\temp\\pass.txt"
         $SecurePassword = ConvertTo-SecureString $EncryptedPassword -Key $Key
         $PlainText = [System.Net.NetworkCredential]::new("", $SecurePassword).Password
 
-
-        # Create local user if not exists
         if (-not (Get-LocalUser -Name "mylocaluser")) {
             net user mylocaluser $PlainText /add
         }
       args:
         executable: powershell
 
-
-    
     - name: Remove AES key file
       win_file:
         path: "C:\\temp\\AES.key"
