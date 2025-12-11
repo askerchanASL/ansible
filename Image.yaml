@@ -1,0 +1,458 @@
+
+---
+# This playbook expects the following variables from AAP/AWX Survey:
+# - environment: "UAT" or "PRD"
+# - team_name: team string (e.g., "ITAS1", "ITDP-CSP")
+# - site_code: site string (e.g., "IFCOAUAT", "IFCDMZPRD", ...)
+# - selected_group: inventory group to target (e.g., "all")
+
+- name: Clone LinuxAgent directory on AAP server
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  vars:
+    repo_url: "https://{{ git_username }}:{{ git_token }}@gitlab.as1nfra.com/askerchan/ansible.git"
+    repo_dest: "/tmp/ME"
+    sparse_dir: "LinuxAgent"
+  pre_tasks:
+    - name: Load GitLab credentials from vault
+      delegate_to: localhost
+      run_once: true
+      ansible.builtin.include_vars:
+        file: vault.yml
+  tasks:
+    - name: Ensure destination directory exists
+      ansible.builtin.file:
+        path: "{{ repo_dest }}"
+        state: directory
+
+    - name: Initialize empty Git repo
+      ansible.builtin.command:
+        cmd: "git init"
+        chdir: "{{ repo_dest }}"
+
+    - name: Set remote origin
+      ansible.builtin.command:
+        cmd: "git remote add origin {{ repo_url }}"
+        chdir: "{{ repo_dest }}"
+
+    - name: Enable sparse checkout
+      ansible.builtin.command:
+        cmd: "git config core.sparseCheckout true"
+        chdir: "{{ repo_dest }}"
+
+    - name: Define sparse-checkout paths
+      ansible.builtin.copy:
+        dest: "{{ repo_dest }}/.git/info/sparse-checkout"
+        content: |
+          {{ sparse_dir }}
+
+    - name: Pull only the specified directory
+      ansible.builtin.command:
+        cmd: "git pull origin main"
+        chdir: "{{ repo_dest }}"
+
+- name: Clone WindowsAgent directory on AAP server
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  vars:
+    repo_url: "https://{{ git_username }}:{{ git_token }}@gitlab.as1nfra.com/askerchan/ansible.git"
+    local_repo_path: "/tmp/WindowsAgent"
+  pre_tasks:
+    - name: Load GitLab credentials from vault
+      delegate_to: localhost
+      run_once: true
+      ansible.builtin.include_vars:
+        file: vault.yml
+  tasks:
+    - name: Ensure local repo directory is clean
+      ansible.builtin.file:
+        path: "{{ local_repo_path }}"
+        state: absent
+
+    - name: Clone repo with sparse checkout enabled
+      ansible.builtin.git:
+        repo: "{{ repo_url }}"
+        dest: "{{ local_repo_path }}"
+        version: main
+        depth: 1
+        single_branch: yes
+        accept_hostkey: yes
+      environment:
+        GIT_SPARSE_CHECKOUT_CONE: "true"
+      register: git_clone_result
+
+    - name: Set sparse-checkout path to WindowsAgent
+      ansible.builtin.command:
+        cmd: git sparse-checkout set WindowsAgent
+        chdir: "{{ local_repo_path }}"
+      when: git_clone_result.changed
+
+- name: Cross-platform Patch Manager Agent Installation
+  hosts: "{{ selected_group }}"
+  gather_facts: yes
+  vars:
+    # Minimum requirements
+    min_cpu_threads: 2
+    min_memory_gb: 4
+    min_disk_gb: 5
+    min_ram_gb: 4
+    min_space_gb: 5
+
+    # Connection (supplied by inventory or extra_vars)
+    ansible_user: "{{ ansible_user }}"
+    ansible_password: "{{ ansible_password }}"
+    ansible_become_password: "{{ ansible_password }}"
+
+    # PMP & DS Servers
+    Non-Prod: "172.31.242.51"
+    Prod: "172.31.242.50"
+
+
+    # Windows-specific
+    installers:
+      Non-Prod: "LocalOffice_Agent.exe"
+      Prod: "TestOffice_Agent.exe"
+
+
+    team_day_map:
+      ITAS1: "1"
+      ITAS2: "2"
+      ITDP: "3"
+      ITDP-CSP: "4"
+      HKFMI: "5"
+      ITS: "6"
+      ITPSO: "0"
+
+    registry_paths:
+      patch: 'HKLM:\SOFTWARE\WOW6432Node\AdventNet\DesktopCentral\DCAgent\Patch'
+      agent: 'HKLM:\SOFTWARE\WOW6432Node\AdventNet\DesktopCentral\DCAgent'
+
+    install_dir_win: "C:\\TEMP\\UEMSAgent\\WindowsAgent"
+    local_repo_path: "/tmp/WindowsAgent"
+
+    # Linux-specific
+    install_dir_linux: /tmp/ME
+    service_file: /etc/systemd/system/dcservice.service
+    site_mapping:
+      PRD: /tmp/IFCOAUAT_UEMSLinuxAgent.zip
+      UAT: /tmp/IFCDMZUAT_UEMSLinuxAgent.zip
+
+
+  tasks:
+    ###########################################################################
+    # Windows block
+    ###########################################################################
+    - name: Run Windows tasks
+      when: ansible_os_family == 'Windows'
+      block:
+        - name: Check CPU threads
+          win_shell: |
+            $cpu = Get-CimInstance -ClassName Win32_Processor
+            $cpu | ForEach-Object { $_.NumberOfLogicalProcessors }
+          register: cpu_threads
+
+        - name: Calculate Total CPU threads
+          set_fact:
+            total_threads: "{{ cpu_threads.stdout_lines | map('int') | sum }}"
+
+        - name: Check memory
+          win_shell: "[math]::Round((Get-WmiObject -Class Win32_ComputerSystem).TotalPhysicalMemory / 1GB, 0)"
+          register: total_memory
+
+        - name: Check disk space
+          win_shell: "(Get-WmiObject -Class Win32_LogicalDisk -Filter \"DeviceID='C:'\").FreeSpace / 1GB"
+          register: free_space
+
+        - name: Fail if system resources are insufficient (Windows)
+          fail:
+            msg: |
+              System does not meet minimum requirements.
+              Required CPU: {{ min_cpu_threads }} threads, Available: {{ total_threads }}
+              Required Memory: {{ min_memory_gb }} GB, Available: {{ total_memory.stdout }} GB
+              Required Disk space: {{ min_disk_gb }} GB, Available: {{ free_space.stdout }} GB
+          when: total_threads | int < min_cpu_threads or
+                total_memory.stdout | int < min_memory_gb or
+                free_space.stdout | int < min_disk_gb
+
+        - name: Create installation directory on Windows
+          win_file:
+            path: "{{ install_dir_win }}"
+            state: directory
+
+        - name: Copy all installation files to Windows
+          win_copy:
+            src: "{{ local_repo_path }}/WindowsAgent"
+            dest: C:\TEMP\UEMSAgent
+            recurse: yes
+
+        # ---- Survey-driven inputs (no CSV) ----
+        - name: Accept Survey inputs (Windows)
+          set_fact:
+            team: "{{ team_name }}"
+            site: "{{ env_raw | default('') }}"
+
+        - name: Fail if env_raw not provided (Windows)
+          fail:
+            msg: "Please provide 'Enviroment' in Survey to select the right installer."
+          when: site | length == 0
+
+        - name: Run installer (Windows)
+          win_command: "{{ installers[site] }} /silent"
+          args:
+            chdir: "{{ install_dir_win }}"
+          register: install_result
+          ignore_errors: yes
+
+        - name: Clean up team name
+          set_fact:
+            team_clean: "{{ team | trim }}"
+
+        - name: Clean up Site Code
+          set_fact:
+            site_clean: "{{ site | trim }}"
+
+        - name: Set registry values if install succeeded
+          when: install_result.rc == 0
+          block:
+            - name: Set DBSyncScanDays
+              win_regedit:
+                path: "{{ registry_paths.patch }}"
+                name: DBSyncScanDays
+                data: "{{ team_day_map[team_clean] }}"
+                type: string
+
+            - name: Set DBSyncScanTime
+              win_regedit:
+                path: "{{ registry_paths.patch }}"
+                name: DBSyncScanTime
+                data: "01:00-04:00"
+                type: string
+
+            - name: Set DEFAULTCPUFACTOR
+              win_regedit:
+                path: "{{ registry_paths.agent }}"
+                name: DEFAULTCPUFACTOR
+                data: 2
+                type: dword
+
+            - name: Set DisableDailyScan
+              win_regedit:
+                path: "{{ registry_paths.patch }}"
+                name: DisableDailyScan
+                data: 1
+                type: dword
+
+        - name: Remove working folder
+          win_file:
+            path: "C:\\TEMP\\UEMSAgent"
+            state: absent
+
+        # ---- PMP IP derived from environment ----
+        - name: Determine PMP IP from environment (Windows)
+          set_fact:
+            win_target_ip: "{{ (environment == 'UAT') | ternary(UATPMP, PRDPMP) }}"
+
+        - name: Clean Target IP (Windows)
+          set_fact:
+            win_target_ip: "{{ win_target_ip | trim }}"
+
+        - name: PMP Service port Checking (Windows)
+          win_wait_for:
+            host: "{{ win_target_ip }}"
+            port: "{{ item }}"
+            timeout: 5
+          loop:
+            - 8383
+            - 8027
+          register: win_port_check_results
+
+        # ---- DS server IP based on site_code (Windows) ----
+        - name: Set DS server IP based on site_code (Windows)
+          set_fact:
+            win_ds_server_ip: >-
+              {% if site == 'IFCOAUAT' %} {{ IFCOAUATDS }}
+              {% elif site == 'IFCOAPRD' %} {{ IFCOAPRDDS }}
+              {% elif site == 'IFCDMZUAT' %} {{ IFCDMZUATDS }}
+              {% elif site == 'IFCDMZPRD' %} {{ IFCDMZPRDDS }}
+              {% elif site == 'KCCOAUAT' %} {{ KCCOAUATDS }}
+              {% elif site == 'KCCOAPRD' %} {{ KCCOAPRDDS }}
+              {% elif site == 'KCCDMZUAT' %} {{ KCCDMZUAT }}
+              {% elif site == 'KCCDMZPRD' %} {{ KCCDMZPRDDS }}
+              {% elif site == 'LZInternalUAT' %} {{ LZInternalUATDS }}
+              {% elif site == 'LZInternalPRD' %} {{ LZInternalPRDDS }}
+              {% elif site == 'LZDMZUAT' %} {{ LZDMZUATDS }}
+              {% elif site == 'LZDMZPRD' %} {{ LZDMZPRDDS }}
+              {% else %} "" {% endif %}
+
+        - name: Clean DS IP (Windows)
+          set_fact:
+            win_ds_server_ip: "{{ win_ds_server_ip | trim }}"
+
+        - name: DS Service port Checking (Windows)
+          win_wait_for:
+            host: "{{ win_ds_server_ip }}"
+            port: 8384
+            timeout: 5
+          register: win_ds_port_check
+
+        - name: Output summary (Windows)
+          debug:
+            msg: >
+              vCPU: {{ cpu_threads.stdout }} Thread
+              Memory: {{ total_memory.stdout | int }} GB
+              FreeSpace: {{ free_space.stdout | int }} GB
+              Site: {{ site }}
+              Team: {{ team }}
+              Installation {{ 'succeeded' if install_result.rc == 0 else 'failed' }}
+
+    ###########################################################################
+    # Linux block
+    ###########################################################################
+    - name: Run Linux tasks
+      when: ansible_os_family != 'Windows'
+      become: yes
+      block:
+        - name: Check CPU threads
+          command: sudo nproc
+          register: cpu_threads_result
+
+        - name: Check Memory
+          set_fact:
+            ram_output: "{{ (ansible_memtotal_mb / 1024) | round }}"
+
+        - name: Check disk space
+          command: df --output=avail -BG /
+          register: disk_output
+
+        - name: Parse disk space
+          set_fact:
+            free_space_gb: "{{ disk_output.stdout_lines[1] | regex_replace('[^0-9]', '') | int }}"
+
+        - name: Fail if system resources are insufficient (Linux)
+          fail:
+            msg: |
+              System does not meet minimum requirements.
+              Required CPU: {{ min_cpu_threads }} threads, Available: {{ cpu_threads_result.stdout }}
+              Required Memory: {{ min_ram_gb }} GB, Available: {{ (ansible_memtotal_mb / 1024) | round }}
+              Required Disk space: {{ min_space_gb }} GB, Available: {{ free_space_gb }} GB
+          when: cpu_threads_result.stdout | int < min_cpu_threads or
+                ram_output | int < min_ram_gb or
+                free_space_gb | int < min_space_gb | int
+
+        - name: Copy UEMS Linux Agent to target
+          ansible.builtin.copy:
+            src: "/tmp/ME/LinuxAgent/"
+            dest: "{{ install_dir_linux }}"
+            mode: '0755'
+            owner: root
+            group: root
+            remote_src: no
+
+        # ---- Survey-driven inputs (no CSV) ----
+        - name: Accept Survey input for site_code (Linux)
+          set_fact:
+            site_code: "{{ site_code | default('') }}"
+
+        - name: Fail if site_code not provided (Linux)
+          fail:
+            msg: "Please provide 'site_code' in Survey to select the right package."
+          when: site_code | length == 0
+
+        - name: Get site zip file
+          set_fact:
+            site_path: "{{ site_mapping[site_code] | default('') }}"
+
+        - name: Fail if site zip not found
+          fail:
+            msg: "No installation package mapped for site code '{{ site_code }}'."
+          when: site_path == ""
+
+        - name: Unzip package
+          unarchive:
+            src: "{{ site_path }}"
+            dest: "{{ install_dir_linux }}"
+            remote_src: yes
+
+        - name: Make installer executable
+          file:
+            path: "{{ install_dir_linux }}/UEMS_LinuxAgent.bin"
+            mode: '0755'
+            state: file
+
+        - name: Run installer
+          command: "{{ install_dir_linux }}/UEMS_LinuxAgent.bin -f"
+          args:
+            chdir: "{{ install_dir_linux }}"
+
+        - name: Modify systemd service
+          block:
+            - name: Ensure service file exists
+              stat:
+                path: "{{ service_file }}"
+              register: service_stat
+
+            - name: Fail if service file missing
+              fail:
+                msg: "Service file not found: {{ service_file }}"
+              when: not service_stat.stat.exists
+
+            - name: Update or insert CPUQuota
+              lineinfile:
+                path: "{{ service_file }}"
+                regexp: ^CPUQuota=
+                line: CPUQuota=50%
+                insertafter: ^\[Service\]
+
+            - name: Reload systemd
+              systemd:
+                daemon_reload: yes
+
+            - name: Restart service
+              systemd:
+                name: dcservice.service
+                state: restarted
+
+        - name: Cleanup installation directory
+          file:
+            path: "{{ install_dir_linux }}"
+            state: absent
+
+        # ---- PMP IP derived from environment ----
+        - name: Determine PMP IP from environment (Linux)
+          set_fact:
+            target_ip: "{{ (environment == 'UAT') | ternary(UATPMP, PRDPMP) }}"
+
+        - name: Clean Target IP (Linux)
+          set_fact:
+            target_ip: "{{ target_ip | trim }}"
+
+        - name: PMP Service port Checking (Linux)
+          wait_for:
+            host: "{{ target_ip }}"
+            port: "{{ item }}"
+            timeout: 5
+          loop:
+            - 8383
+            - 8027
+          register: port_check_results
+
+        # ---- DS server IP based on site_code (Linux) ----
+        - name: Set DS server IP based on site_code (Linux)
+          set_fact:
+            ds_server_ip: >-
+              {% if site_code == 'IFCOAUAT' %} {{ IFCOAUATDS }}
+              {% elif site_code == 'IFCOAPRD' %} {{ IFCOAPRDDS }}
+              {% elif site_code == 'IFCDMZUAT' %} {{ IFCDMZUATDS }}
+              {% elif site_code == 'IFCDMZPRD' %} {{ IFCDMZPRDDS }}
+              {% elif site_code == 'KCCOAUAT' %} {{ KCCOAUATDS }}
+              {% elif site_code == 'KCCOAPRD' %} {{ KCCOAPRDDS }}
+              {% elif site_code == 'KCCDMZUAT' %} {{ KCCDMZUAT }}
+              {% elif site_code == 'KCCDMZPRD' %} {{ KCCDMZPRDDS }}
+              {% elif site_code == 'LZInternalUAT' %} {{ LZInternalUATDS }}
+              {% elif site_code == 'LZInternalPRD' %} {{ LZInternalPRDDS }}
+              {% elif site_code == 'LZDMZUAT' %} {{ LZDMZUATDS }}
+              {% elif site_code == 'LZDMZPRD' %} {{ LZDMZPRDDS }}
+              {% else %} "" {% endif %}
+
