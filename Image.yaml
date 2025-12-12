@@ -12,8 +12,8 @@
   gather_facts: no
   vars:
     repo_url: "https://{{ git_username }}:{{ git_token }}@gitlab.as1nfra.com/askerchan/ansible.git"
-    repo_dest: "/tmp/ME"
-    sparse_dir: "LinuxAgent"
+    repo_dest: "/tmp/LinuxAgent"
+    sparse_dir: "Image/Linux"
   pre_tasks:
     - name: Load GitLab credentials from vault
       delegate_to: localhost
@@ -455,4 +455,5 @@
               {% elif site_code == 'LZDMZUAT' %} {{ LZDMZUATDS }}
               {% elif site_code == 'LZDMZPRD' %} {{ LZDMZPRDDS }}
               {% else %} "" {% endif %}
+
 
