@@ -183,7 +183,7 @@
 
         - name: Copy all installation files to Windows
           win_copy:
-            src: "{{ local_repo_path }}/WindowsAgent"
+            src: "{{ local_repo_path }}"
             dest: C:\TEMP\UEMSAgent
             recurse: yes
 
@@ -455,6 +455,7 @@
               {% elif site_code == 'LZDMZUAT' %} {{ LZDMZUATDS }}
               {% elif site_code == 'LZDMZPRD' %} {{ LZDMZPRDDS }}
               {% else %} "" {% endif %}
+
 
 
 
