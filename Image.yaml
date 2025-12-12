@@ -106,13 +106,13 @@
     #ansible_become_password: "{{ ansible_password }}"
 
     # PMP & DS Servers
-    Non-Prod: "172.31.242.51"
+    NonProd: "172.31.242.51"
     Prod: "172.31.242.50"
 
 
     # Windows-specific
     installers:
-      Non-Prod: "LocalOffice_Agent.exe"
+      NonProd: "LocalOffice_Agent.exe"
       Prod: "TestOffice_Agent.exe"
 
 
@@ -455,6 +455,7 @@
               {% elif site_code == 'LZDMZUAT' %} {{ LZDMZUATDS }}
               {% elif site_code == 'LZDMZPRD' %} {{ LZDMZPRDDS }}
               {% else %} "" {% endif %}
+
 
 
 
