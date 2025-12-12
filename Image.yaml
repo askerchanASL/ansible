@@ -129,7 +129,7 @@
       patch: 'HKLM:\SOFTWARE\WOW6432Node\AdventNet\DesktopCentral\DCAgent\Patch'
       agent: 'HKLM:\SOFTWARE\WOW6432Node\AdventNet\DesktopCentral\DCAgent'
 
-    install_dir_win: "C:\\TEMP\\UEMSAgent\\WindowsAgent"
+    install_dir_win: "C:\\TEMP\\UEMSAgent\\WindowsAgent\\Image\\Windows"
     local_repo_path: "/tmp/WindowsAgent"
 
     # Linux-specific
@@ -455,6 +455,7 @@
               {% elif site_code == 'LZDMZUAT' %} {{ LZDMZUATDS }}
               {% elif site_code == 'LZDMZPRD' %} {{ LZDMZPRDDS }}
               {% else %} "" {% endif %}
+
 
 
 
