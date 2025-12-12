@@ -101,9 +101,9 @@
     min_space_gb: 5
 
     # Connection (supplied by inventory or extra_vars)
-    ansible_user: "{{ ansible_user }}"
-    ansible_password: "{{ ansible_password }}"
-    ansible_become_password: "{{ ansible_password }}"
+    #ansible_user: "{{ ansible_user }}"
+    #ansible_password: "{{ ansible_password }}"
+    #ansible_become_password: "{{ ansible_password }}"
 
     # PMP & DS Servers
     Non-Prod: "172.31.242.51"
@@ -191,7 +191,7 @@
         - name: Accept Survey inputs (Windows)
           set_fact:
             team: "{{ team_name }}"
-            site: "{{ env_raw | default('') }}"
+            site: "{{ env_raw  }}"
 
         - name: Fail if env_raw not provided (Windows)
           fail:
@@ -455,6 +455,7 @@
               {% elif site_code == 'LZDMZUAT' %} {{ LZDMZUATDS }}
               {% elif site_code == 'LZDMZPRD' %} {{ LZDMZPRDDS }}
               {% else %} "" {% endif %}
+
 
 
 
