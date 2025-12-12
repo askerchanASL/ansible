@@ -85,7 +85,7 @@
 
     - name: Set sparse-checkout path to WindowsAgent
       ansible.builtin.command:
-        cmd: git sparse-checkout set WindowsAgent
+        cmd: git sparse-checkout set /Image/Windows
         chdir: "{{ local_repo_path }}"
       when: git_clone_result.changed
 
@@ -455,5 +455,6 @@
               {% elif site_code == 'LZDMZUAT' %} {{ LZDMZUATDS }}
               {% elif site_code == 'LZDMZPRD' %} {{ LZDMZPRDDS }}
               {% else %} "" {% endif %}
+
 
 
