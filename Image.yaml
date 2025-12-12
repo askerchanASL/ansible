@@ -90,7 +90,7 @@
       when: git_clone_result.changed
 
 - name: Cross-platform Patch Manager Agent Installation
-  hosts: "{{ selected_group }}"
+  hosts: all
   gather_facts: yes
   vars:
     # Minimum requirements
@@ -455,6 +455,7 @@
               {% elif site_code == 'LZDMZUAT' %} {{ LZDMZUATDS }}
               {% elif site_code == 'LZDMZPRD' %} {{ LZDMZPRDDS }}
               {% else %} "" {% endif %}
+
 
 
 
