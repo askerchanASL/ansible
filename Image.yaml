@@ -201,10 +201,10 @@
 
         - name: Run installer (Windows)
           win_package:
-            path: "{{ install_dir_win }}\\{{ installers[site] }} "
+            path: "{{ install_dir_win }}\\{{ installers[site] | regex_replace('^\\\\+','') }}"
             arguments: >
               /qn 
-              TRANSFORMS="{{ arg_path }}\UEMSAgent.mst" 
+              TRANSFORMS="{{ arg_path }}\\UEMSAgent.mst" 
               ENABLESILENT=yes 
               REBOOT=ReallySuppress 
               INSTALLSOURCE=Manual 
@@ -433,6 +433,7 @@
             - 8383
             - 8027
           register: port_check_results
+
 
 
 
