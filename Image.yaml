@@ -112,10 +112,9 @@
 
     # Windows-specific
     installers:
-      NonProd: "LocalOffice_Agent.exe"
-      Prod: "TestOffice_Agent.exe"
-
-
+      Prod: "Prod_UEMSAgent.msi"
+      NonProd: "UAT_UEMSAgent.msi"
+      
     team_day_map:
       ITAS1: "1"
       ITAS2: "2"
@@ -136,8 +135,8 @@
     install_dir_linux: /tmp/ME
     service_file: /etc/systemd/system/dcservice.service
     site_mapping:
-      PRD: /tmp/IFCOAUAT_UEMSLinuxAgent.zip
-      UAT: /tmp/IFCDMZUAT_UEMSLinuxAgent.zip
+      Prod: /tmp/Prod_UEMSLinuxAgent.zip
+      NonProd: /tmp/UAT_UEMSLinuxAgent.zip
 
 
   tasks:
@@ -244,6 +243,13 @@
                 data: 1
                 type: dword
 
+            - name: Set Force POCO
+              win_regedit:
+                path: "{{ registry_paths.patch }}"
+                name: DisableDailyScan
+                data: 1
+                type: dword
+
         - name: Remove working folder
           win_file:
             path: "C:\\TEMP\\UEMSAgent"
@@ -267,35 +273,6 @@
             - 8383
             - 8027
           register: win_port_check_results
-
-        # ---- DS server IP based on site_code (Windows) ----
-        - name: Set DS server IP based on site_code (Windows)
-          set_fact:
-            win_ds_server_ip: >-
-              {% if site == 'IFCOAUAT' %} {{ IFCOAUATDS }}
-              {% elif site == 'IFCOAPRD' %} {{ IFCOAPRDDS }}
-              {% elif site == 'IFCDMZUAT' %} {{ IFCDMZUATDS }}
-              {% elif site == 'IFCDMZPRD' %} {{ IFCDMZPRDDS }}
-              {% elif site == 'KCCOAUAT' %} {{ KCCOAUATDS }}
-              {% elif site == 'KCCOAPRD' %} {{ KCCOAPRDDS }}
-              {% elif site == 'KCCDMZUAT' %} {{ KCCDMZUAT }}
-              {% elif site == 'KCCDMZPRD' %} {{ KCCDMZPRDDS }}
-              {% elif site == 'LZInternalUAT' %} {{ LZInternalUATDS }}
-              {% elif site == 'LZInternalPRD' %} {{ LZInternalPRDDS }}
-              {% elif site == 'LZDMZUAT' %} {{ LZDMZUATDS }}
-              {% elif site == 'LZDMZPRD' %} {{ LZDMZPRDDS }}
-              {% else %} "" {% endif %}
-
-        - name: Clean DS IP (Windows)
-          set_fact:
-            win_ds_server_ip: "{{ win_ds_server_ip | trim }}"
-
-        - name: DS Service port Checking (Windows)
-          win_wait_for:
-            host: "{{ win_ds_server_ip }}"
-            port: 8384
-            timeout: 5
-          register: win_ds_port_check
 
         - name: Output summary (Windows)
           debug:
@@ -351,9 +328,9 @@
             remote_src: no
 
         # ---- Survey-driven inputs (no CSV) ----
-        - name: Accept Survey input for site_code (Linux)
+        - name: Accept Survey input for enviroment (Linux)
           set_fact:
-            site_code: "{{ site_code | default('') }}"
+            site_code: "{{ env_raw }}"
 
         - name: Fail if site_code not provided (Linux)
           fail:
@@ -438,23 +415,8 @@
             - 8027
           register: port_check_results
 
-        # ---- DS server IP based on site_code (Linux) ----
-        - name: Set DS server IP based on site_code (Linux)
-          set_fact:
-            ds_server_ip: >-
-              {% if site_code == 'IFCOAUAT' %} {{ IFCOAUATDS }}
-              {% elif site_code == 'IFCOAPRD' %} {{ IFCOAPRDDS }}
-              {% elif site_code == 'IFCDMZUAT' %} {{ IFCDMZUATDS }}
-              {% elif site_code == 'IFCDMZPRD' %} {{ IFCDMZPRDDS }}
-              {% elif site_code == 'KCCOAUAT' %} {{ KCCOAUATDS }}
-              {% elif site_code == 'KCCOAPRD' %} {{ KCCOAPRDDS }}
-              {% elif site_code == 'KCCDMZUAT' %} {{ KCCDMZUAT }}
-              {% elif site_code == 'KCCDMZPRD' %} {{ KCCDMZPRDDS }}
-              {% elif site_code == 'LZInternalUAT' %} {{ LZInternalUATDS }}
-              {% elif site_code == 'LZInternalPRD' %} {{ LZInternalPRDDS }}
-              {% elif site_code == 'LZDMZUAT' %} {{ LZDMZUATDS }}
-              {% elif site_code == 'LZDMZPRD' %} {{ LZDMZPRDDS }}
-              {% else %} "" {% endif %}
+
+
 
 
 
