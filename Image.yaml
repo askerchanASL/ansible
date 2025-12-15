@@ -194,7 +194,7 @@
           when: site | length == 0
 
         - name: Run installer (Windows)
-          win_command: "{{ installers[site] }} " /qn
+          win_command: "{{ installers[site] }} /qn"
            TRANSFORMS="{{ install_dir }}\UEMSAgent.mst"
            ENABLESILENT=yes
            REBOOT=ReallySuppress
@@ -423,6 +423,7 @@
             - 8383
             - 8027
           register: port_check_results
+
 
 
 
