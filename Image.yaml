@@ -90,7 +90,7 @@
       when: git_clone_result.changed
 
 - name: Cross-platform Patch Manager Agent Installation
-  hosts: all
+  hosts: "{{ hosts.split(',') }}"
   gather_facts: yes
   vars:
     # Minimum requirements
@@ -101,9 +101,9 @@
     min_space_gb: 5
 
     # Connection (supplied by inventory or extra_vars)
-    #ansible_user: "{{ ansible_user }}"
-    #ansible_password: "{{ ansible_password }}"
-    #ansible_become_password: "{{ ansible_password }}"
+    ansible_user: "{{ aapuser_user }}"
+    ansible_password: "{{ aapuser_psw }}"
+    ansible_become_password: "{{ ansible_password }}"
 
     # PMP & DS Servers
     NonProd: "172.31.242.51"
@@ -455,6 +455,7 @@
               {% elif site_code == 'LZDMZUAT' %} {{ LZDMZUATDS }}
               {% elif site_code == 'LZDMZPRD' %} {{ LZDMZPRDDS }}
               {% else %} "" {% endif %}
+
 
 
 
