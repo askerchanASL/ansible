@@ -203,12 +203,11 @@
           win_package:
             path: "{{ install_dir_win }}\\{{ installers[site] | regex_replace('^\\\\+','') }}"
             arguments: >
-              /qn 
-              TRANSFORMS="{{ arg_path }}\\UEMSAgent.mst" 
-              ENABLESILENT=yes 
-              REBOOT=ReallySuppress 
-              INSTALLSOURCE=Manual 
-              SERVER_ROOT_CRT="{{ arg_path }}\\DMRootCA-Server.crt" 
+              TRANSFORMS="{{ arg_path }}\\UEMSAgent.mst"
+              ENABLESILENT=yes
+              REBOOT=ReallySuppress
+              INSTALLSOURCE=Manual
+              SERVER_ROOT_CRT="{{ arg_path }}\\DMRootCA-Server.crt"
               DS_ROOT_CRT="{{ arg_path }}\\DMRootCA.crt"
             state: present
           #args:
@@ -433,29 +432,6 @@
             - 8383
             - 8027
           register: port_check_results
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
