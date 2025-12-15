@@ -124,7 +124,7 @@
       agent: 'HKLM:\SOFTWARE\WOW6432Node\AdventNet\DesktopCentral\DCAgent'
       NSStatus: 'HKLM:\SOFTWARE\WOW6432Node\AdventNet\DesktopCentral\DCAgent\NSStatusDetails'
 
-    install_dir_win: "C:\\TEMP\\UEMSAgent\\WindowsAgent\\Image\\Windows"
+    install_dir_win: "C:\\TEMP"
     local_repo_path: "/tmp/WindowsAgent"
 
     # Linux-specific
@@ -417,6 +417,7 @@
             - 8383
             - 8027
           register: port_check_results
+
 
 
 
