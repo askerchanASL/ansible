@@ -103,7 +103,7 @@
     # Connection (supplied by inventory or extra_vars)
     ansible_user: "{{ aapuser_user }}"
     ansible_password: "{{ aapuser_psw }}"
-    ansible_become_password: "{{ ansible_password }}"
+    ansible_become_password: "{{ aapuser_psw }}"
 
     # PMP & DS Servers
     NonProd: "172.31.242.51"
@@ -455,6 +455,7 @@
               {% elif site_code == 'LZDMZUAT' %} {{ LZDMZUATDS }}
               {% elif site_code == 'LZDMZPRD' %} {{ LZDMZPRDDS }}
               {% else %} "" {% endif %}
+
 
 
 
