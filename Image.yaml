@@ -122,6 +122,7 @@
     registry_paths:
       patch: 'HKLM:\SOFTWARE\WOW6432Node\AdventNet\DesktopCentral\DCAgent\Patch'
       agent: 'HKLM:\SOFTWARE\WOW6432Node\AdventNet\DesktopCentral\DCAgent'
+      NSStatus: 'HKLM:\SOFTWARE\WOW6432Node\AdventNet\DesktopCentral\DCAgent\NSStatusDetails'
 
     install_dir_win: "C:\\TEMP\\UEMSAgent\\WindowsAgent\\Image\\Windows"
     local_repo_path: "/tmp/WindowsAgent"
@@ -241,8 +242,15 @@
             - name: Set Force POCO
               win_regedit:
                 path: "{{ registry_paths.patch }}"
-                name: DisableDailyScan
+                name: forceenablepoco
                 data: 1
+                type: dword
+
+            - name: Set NSStatusLastRetriveTime
+              win_regedit:
+                path: "{{ registry_paths.NSStatus }}"
+                name: NSStatusLastRetriveTime
+                data: 0
                 type: dword
 
         - name: Remove working folder
@@ -250,10 +258,10 @@
             path: "C:\\TEMP\\UEMSAgent"
             state: absent
 
-        # ---- PMP IP derived from environment ----
+        
         - name: Determine PMP IP from environment (Windows)
           set_fact:
-            win_target_ip: "{{ (environment == 'UAT') | ternary(UATPMP, PRDPMP) }}"
+            win_target_ip: "{{ (environment == 'UAT') | ternary(NonProd, Prod) }}"
 
         - name: Clean Target IP (Windows)
           set_fact:
@@ -322,7 +330,7 @@
             group: root
             remote_src: no
 
-        # ---- Survey-driven inputs (no CSV) ----
+        
         - name: Accept Survey input for enviroment (Linux)
           set_fact:
             site_code: "{{ env_raw }}"
@@ -409,6 +417,7 @@
             - 8383
             - 8027
           register: port_check_results
+
 
 
 
