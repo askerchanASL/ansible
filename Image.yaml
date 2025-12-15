@@ -125,7 +125,7 @@
       NSStatus: 'HKLM:\SOFTWARE\WOW6432Node\AdventNet\DesktopCentral\DCAgent\NSStatusDetails'
 
     install_dir_win: "C:\TEMP\UEMSAgent\WindowsAgent\Image\Windows"
-    Prodarg_path: "C:\TEMP\UEMSAgent\\WindowsAgent\Image\Windows\Prod"
+    Prodarg_path: "C:\TEMP\UEMSAgent\WindowsAgent\Image\Windows\Prod"
     UATdarg_path: "C:\TEMP\UEMSAgent\WindowsAgent\Image\Windows\NonProd"
     local_repo_path: "/tmp/WindowsAgent"
 
@@ -429,6 +429,7 @@
             - 8383
             - 8027
           register: port_check_results
+
 
 
 
