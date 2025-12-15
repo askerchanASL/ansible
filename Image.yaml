@@ -107,8 +107,8 @@
 
     # Windows-specific
     installers:
-      Prod: "\\Prod\\Prod_UEMSAgent.msi"
-      NonProd: "UAT_UEMSAgent.msi"
+      Prod: "Prod\\Prod_UEMSAgent.msi"
+      NonProd: "NonProd\\UAT_UEMSAgent.msi"
       
     team_day_map:
       ITAS1: "1"
@@ -195,10 +195,21 @@
             msg: "Please provide 'Enviroment' in Survey to select the right installer."
           when: site | length == 0
 
+        - name: Select argument path per environment
+          set_fact:
+            arg_path: "{{ Prodarg_path if site == 'Prod' else UATdarg_path }}"
+
         - name: Run installer (Windows)
           win_package:
             path: "{{ install_dir_win }}\\{{ installers[site] }} "
-            arguments: '/qn TRANSFORMS="{{ install_dir_win }}\UEMSAgent.mst" ENABLESILENT=yes REBOOT=ReallySuppress INSTALLSOURCE=Manual SERVER_ROOT_CRT="{{ install_dir_win }}\DMRootCA-Server.crt" DS_ROOT_CRT="{{ install_dir_win }}\DMRootCA.crt"'
+            arguments: >
+              /qn 
+              TRANSFORMS="{{ arg_path }}\UEMSAgent.mst" 
+              ENABLESILENT=yes 
+              REBOOT=ReallySuppress 
+              INSTALLSOURCE=Manual 
+              SERVER_ROOT_CRT="{{ arg_path }}\\DMRootCA-Server.crt" 
+              DS_ROOT_CRT="{{ arg_path }}\\DMRootCA.crt"
             state: present
           #args:
             #chdir: "{{ install_dir_win }}"
@@ -422,6 +433,7 @@
             - 8383
             - 8027
           register: port_check_results
+
 
 
 
