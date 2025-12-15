@@ -194,12 +194,14 @@
           when: site | length == 0
 
         - name: Run installer (Windows)
-          win_command: "{{ installers[site] }} /qn TRANSFORMS="{{ install_dir }}\UEMSAgent.mst" ENABLESILENT=yes REBOOT=ReallySuppress INSTALLSOURCE=Manual SERVER_ROOT_CRT="{{ install_dir }}\DMRootCA-Server.crt" DS_ROOT_CRT="{{ install_dir }}\DMRootCA.crt""
-
-          args:
-            chdir: "{{ install_dir_win }}"
+          win_package:
+            path: "{{ install_dir_win }}\\{{ installers[site] }} "
+            arguments: '/qn TRANSFORMS="{{ install_dir }}\UEMSAgent.mst" ENABLESILENT=yes REBOOT=ReallySuppress INSTALLSOURCE=Manual SERVER_ROOT_CRT="{{ install_dir }}\DMRootCA-Server.crt" DS_ROOT_CRT="{{ install_dir }}\DMRootCA.crt"'
+            state: present
+          #args:
+            #chdir: "{{ install_dir_win }}"
           register: install_result
-          ignore_errors: yes
+          #ignore_errors: yes
 
         - name: Clean up team name
           set_fact:
@@ -418,6 +420,7 @@
             - 8383
             - 8027
           register: port_check_results
+
 
 
 
