@@ -107,8 +107,8 @@
 
     # Windows-specific
     installers:
-      Prod: "Prod\Prod_UEMSAgent.msi"
-      NonProd: "NonProd\UAT_UEMSAgent.msi"
+      Prod: "Prod\\Prod_UEMSAgent.msi"
+      NonProd: "NonProd\\UAT_UEMSAgent.msi"
       
     team_day_map:
       ITAS1: "1"
@@ -429,6 +429,7 @@
             - 8383
             - 8027
           register: port_check_results
+
 
 
 
