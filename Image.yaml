@@ -1,10 +1,5 @@
 
 ---
-# This playbook expects the following variables from AAP/AWX Survey:
-# - environment: "UAT" or "PRD"
-# - team_name: team string (e.g., "ITAS1", "ITDP-CSP")
-# - site_code: site string (e.g., "IFCOAUAT", "IFCDMZPRD", ...)
-# - selected_group: inventory group to target (e.g., "all")
 
 - name: Clone LinuxAgent directory on AAP server
   hosts: localhost
@@ -198,7 +193,7 @@
           when: site | length == 0
 
         - name: Run installer (Windows)
-          win_command: "{{ installers[site] }} /silent"
+          win_command: "{{ installers[site] }} /qn"
           args:
             chdir: "{{ install_dir_win }}"
           register: install_result
@@ -414,6 +409,7 @@
             - 8383
             - 8027
           register: port_check_results
+
 
 
 
