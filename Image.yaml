@@ -201,7 +201,7 @@
 
         - name: Run installer (Windows)
           win_command: >
-            msiexec.exe /i "{{ install_dir_win }}\\{{ installers[site] | regex_replace('^\\\\+','') }}"
+            msiexec.exe /i "{{ install_dir_win }} {{ installers[site] | regex_replace('^\\\\+','') }}"
             /qn /norestart
             TRANSFORMS="{{ arg_path }}\UEMSAgent.mst"
             ENABLESILENT=yes
@@ -429,6 +429,7 @@
             - 8383
             - 8027
           register: port_check_results
+
 
 
 
