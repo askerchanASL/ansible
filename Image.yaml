@@ -107,8 +107,8 @@
 
     # Windows-specific
     installers:
-      Prod: "Prod\\Prod_UEMSAgent.msi"
-      NonProd: "NonProd\\UAT_UEMSAgent.msi"
+      Prod: "Prod\Prod_UEMSAgent.msi"
+      NonProd: "NonProd\UAT_UEMSAgent.msi"
       
     team_day_map:
       ITAS1: "1"
@@ -124,9 +124,9 @@
       agent: 'HKLM:\SOFTWARE\WOW6432Node\AdventNet\DesktopCentral\DCAgent'
       NSStatus: 'HKLM:\SOFTWARE\WOW6432Node\AdventNet\DesktopCentral\DCAgent\NSStatusDetails'
 
-    install_dir_win: "C:\\TEMP\\UEMSAgent\\WindowsAgent\\Image\\Windows"
-    Prodarg_path: "C:\\TEMP\\UEMSAgent\\WindowsAgent\\Image\\Windows\\Prod"
-    UATdarg_path: "C:\\TEMP\\UEMSAgent\\WindowsAgent\\Image\\Windows\\NonProd"
+    install_dir_win: "C:\TEMP\UEMSAgent\WindowsAgent\Image\Windows"
+    Prodarg_path: "C:\TEMP\UEMSAgent\\WindowsAgent\Image\Windows\Prod"
+    UATdarg_path: "C:\TEMP\UEMSAgent\WindowsAgent\Image\Windows\NonProd"
     local_repo_path: "/tmp/WindowsAgent"
 
     # Linux-specific
@@ -200,18 +200,15 @@
             arg_path: "{{ Prodarg_path if site == 'Prod' else UATdarg_path }}"
 
         - name: Run installer (Windows)
-          win_package:
-            path: "{{ install_dir_win }}\\{{ installers[site] | regex_replace('^\\\\+','') }}"
-            arguments: >
-              TRANSFORMS="{{ arg_path }}\\UEMSAgent.mst"
-              ENABLESILENT=yes
-              REBOOT=ReallySuppress
-              INSTALLSOURCE=Manual
-              SERVER_ROOT_CRT="{{ arg_path }}\\DMRootCA-Server.crt"
-              DS_ROOT_CRT="{{ arg_path }}\\DMRootCA.crt"
-            state: present
-          #args:
-            #chdir: "{{ install_dir_win }}"
+          win_command: >
+            msiexec.exe /i "{{ install_dir_win }}\\{{ installers[site] | regex_replace('^\\\\+','') }}"
+            /qn /norestart
+            TRANSFORMS="{{ arg_path }}\UEMSAgent.mst"
+            ENABLESILENT=yes
+            REBOOT=ReallySuppress
+            INSTALLSOURCE=Manual
+            SERVER_ROOT_CRT="{{ arg_path }}\DMRootCA-Server.crt"
+            DS_ROOT_CRT="{{ arg_path }}\DMRootCA.crt"
           register: install_result
           #ignore_errors: yes
 
@@ -432,6 +429,7 @@
             - 8383
             - 8027
           register: port_check_results
+
 
 
 
